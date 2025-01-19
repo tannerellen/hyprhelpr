@@ -5,12 +5,12 @@ A useful tool for Hyprland to make common tasks easier. Create custom menus, tog
 Download the latest release, unzip and copy the app into any folder in your $PATH like /usr/local/bin/
 Alternatively you can launch the app from any directory by specifying the path to it's location like ~/MyApps/hyprhelpr
 
-To use hyprhelpr you specify the module and any parameters. You can read about each module below but it looks like this
+To use hyprhelpr you specify the module and any arguments. You can read about each module below but it looks like this:
 ```
 hyprhelpr [MODULE] [ARGUMENT] [ARGUMENT]
 ```
 
-Here are some real world examples
+Here are some real world examples:
 ```
 hyprhelpr menu | fuzzel --dmenu
 ```
@@ -32,8 +32,11 @@ The menu module is used to create menu functionality in any dmenu based app. Thi
 Outputs a list of menu items that can be piped into any dmenu compatible launcher.
 
 **Config properties:**
-- label: Human readable label that will appear as the menu text.
+
+- label: Human readable label string that will appear as the menu text.
+
 - command: The command string to run when the menu item is selected. Will run as bash.
+
 - next: Optional array that will indicate there is another sub menu. This can be an empty array if the command itself will bring up a sub menu or can contain an array of objects that contain the proproperties listed above.`
 
 **Usage:**
@@ -45,9 +48,15 @@ hyprhelpr menu
 Toggle allows easy setup to toggle apps in hyprland's special workspaces. This works great to quickly show an app and then hide it. Especially usefull for things like interacting with notes, calculator, music players or any other app that you want quick access to but doesn't need to be on screen all the time.
 
 **Config properties:**
+
 - entries: An array of objects that will contain the properties listed below representing the apps you would like to include as toggleable.
-    - name: The unique name to use when activating the toggle for a particular app.
-    - command: The command used to launch the app. If the app is used more places than the toggle it is recommended to make the launch string contain unique identifiers like --class some-class.
+
+    - name: The unique name string to use when activating the toggle for a particular app.
+    
+    - command: The command string used to launch the app. If the app is used more places than the toggle it is recommended to make the launch string contain unique identifiers like --class some-class. By default hyprhelpr will use the command as the processMatch to determine if the app is already running or not.
+
+    - processMatch: An optional string for hyprhelpr to match the running process to know if the app is already running or not. Sometimes the way you launch an app isn't the actual process that is running so this is useful for those situations. For example running the flatpak for gedit with "flatpak run gedit" will not actually run that process but will open a process of just "gedit". See the example config for how to handle that situation. You can use a tool like btop or just ps aux | grep "app name" to see what a good string would be to use here if needed.
+
     - size: A size string in the format that Hyprland window rules uses, ie. "25% 50%".
     
 
@@ -60,10 +69,14 @@ hyprhelper toggle <name specified in config>
 Zoom in on your cursor position. Can be animated or instant. If no zoom amount is specified it will toggle between the zoom amount specified in the config and not zoomed at all.
 
 **Config properties:**
-- default: The default zoom change value used when toggling zoom. This is used if no zoom value is specified when calling the module.
+
+- default: A positive number specifying the default zoom change value used when toggling zoom. This is used if no zoom value is specified when calling the module.
+
 - animate: A boolean (true, false) wether to animate the zoom.
+
 - duration: A number value representing the duration of the animation in seconds.
-- fps: How many frames per second the animation will target. Anything under 60 will look choppy. You can experiment with this to get a smooth zoom. 120 provides a very smooth zoom animation.
+
+- fps: A number specifying how many frames per second the animation will target. Anything under 60 will look choppy. You can experiment with this to get a smooth zoom. 120 provides a very smooth zoom animation.
 
 **Usage:**
 ```
@@ -77,12 +90,17 @@ Set a random wallpaper or specific one from a directory. Can set a specific wall
 [Hyprpaper](https://wiki.hyprland.org/Hypr-Ecosystem/hyprpaper/)
 
 **Config properties:**
-- directory: The path to the directory containing wallpapers.
+
+- directory: The path string to the directory containing wallpapers.
 
 **Usage:**
 ```
 hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 ```
+
+### Screencast
+
+**Coming soon**
 
 ## Config
 **Save a json formatted config file to: ~/.config/hyprhelpr/config.json**
