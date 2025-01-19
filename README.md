@@ -13,19 +13,15 @@ hyprhelpr [MODULE] [ARGUMENT] [ARGUMENT]
 Here are some real world examples
 ```
 hyprhelpr menu | fuzzel --dmenu
-
 ```
 ```
 hyprhelpr toggle pavucontrol
-
 ```
 ```
 hyprhelpr zoom 0.5
-
 ```
 ```
 hyprhelpr wallpaper set ~/Pictures/Wallpapers/MyImage.jpg
-
 ```
 
 ## Modules
