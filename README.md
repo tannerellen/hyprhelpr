@@ -53,6 +53,9 @@ hyprhelper zoom <optional zoom change amount>
 ### Wallpaper
 Set a random wallpaper or specific one from a directory. Can set a specific wallpaper if a path is specified or set a random wallpaper if no path is specified. List will list all wallpapers in the directory specified in the config. Useful for passing wallpapers to dmenu.
 
+Requires:
+[Hyprpaper](https://wiki.hyprland.org/Hypr-Ecosystem/hyprpaper/)
+
 Usage:
 ```
 hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
