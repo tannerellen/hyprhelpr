@@ -12,9 +12,7 @@ export async function loadConfig() {
     config = configResult || {};
     return configResult;
   } catch (err) {
-    throw new Error(
-      "Config not found. Make sure a valid config.json file exists.",
-    );
+    throw err;
   }
 }
 

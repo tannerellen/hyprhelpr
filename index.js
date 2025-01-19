@@ -26,7 +26,7 @@ loadConfig()
     run();
   })
   .catch((err) => {
-    console.log(err.message);
+    console.log(`Config error: ${err.message}`);
   });
 
 function run() {
