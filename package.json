@@ -1,5 +1,6 @@
 {
-  "name": "tanland",
+  "name": "hyprhelpr",
+  "version": "0.0.2",
   "module": "index.js",
   "type": "module",
   "devDependencies": {
@@ -9,3 +10,4 @@
     "typescript": "^5.0.0"
   }
 }
+
