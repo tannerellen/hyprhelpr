@@ -29,7 +29,14 @@ hyprhelpr wallpaper set ~/Pictures/Wallpapers/MyImage.jpg
 ### Menu
 The menu module is used to create menu functionality in any dmenu based app. This allows for easy custom menus in things like rofi, fuzzel, and walker. Menus can be multiple levels deep. 
 
-Outputs a list of menu items that can be piped into any dmenu compatible launcher. The only usage of this module is
+Outputs a list of menu items that can be piped into any dmenu compatible launcher.
+
+**Config properties:**
+- label: Human readable label that will appear as the menu text.
+- command: The command string to run when the menu item is selected. Will run as bash.
+- next: Optional array that will indicate there is another sub menu. This can be an empty array if the command itself will bring up a sub menu or can contain an array of objects that contain the proproperties listed above.`
+
+**Usage:**
 ```
 hyprhelpr menu
 ```
@@ -37,7 +44,14 @@ hyprhelpr menu
 ### Toggle
 Toggle allows easy setup to toggle apps in hyprland's special workspaces. This works great to quickly show an app and then hide it. Especially usefull for things like interacting with notes, calculator, music players or any other app that you want quick access to but doesn't need to be on screen all the time.
 
-Usage:
+**Config properties:**
+- entries: An array of objects that will contain the properties listed below representing the apps you would like to include as toggleable.
+    - name: The unique name to use when activating the toggle for a particular app.
+    - command: The command used to launch the app. If the app is used more places than the toggle it is recommended to make the launch string contain unique identifiers like --class some-class.
+    - size: A size string in the format that Hyprland window rules uses, ie. "25% 50%".
+    
+
+**Usage:**
 ```
 hyprhelper toggle <name specified in config>
 ```
@@ -45,7 +59,13 @@ hyprhelper toggle <name specified in config>
 ### Zoom
 Zoom in on your cursor position. Can be animated or instant. If no zoom amount is specified it will toggle between the zoom amount specified in the config and not zoomed at all.
 
-Usage:
+**Config properties:**
+- default: The default zoom change value used when toggling zoom. This is used if no zoom value is specified when calling the module.
+- animate: A boolean (true, false) wether to animate the zoom.
+- duration: A number value representing the duration of the animation in seconds.
+- fps: How many frames per second the animation will target. Anything under 60 will look choppy. You can experiment with this to get a smooth zoom. 120 provides a very smooth zoom animation.
+
+**Usage:**
 ```
 hyprhelper zoom <optional zoom change amount>
 ```
@@ -53,10 +73,13 @@ hyprhelper zoom <optional zoom change amount>
 ### Wallpaper
 Set a random wallpaper or specific one from a directory. Can set a specific wallpaper if a path is specified or set a random wallpaper if no path is specified. List will list all wallpapers in the directory specified in the config. Useful for passing wallpapers to dmenu.
 
-Requires:
+**Requires:**
 [Hyprpaper](https://wiki.hyprland.org/Hypr-Ecosystem/hyprpaper/)
 
-Usage:
+**Config properties:**
+- directory: The path to the directory containing wallpapers.
+
+**Usage:**
 ```
 hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 ```
@@ -116,11 +139,11 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
         "next": [
           {
             "label": "Hex",
-            "command": "hyprpicker --format hex | wl-copy"
+            "command": "sleep 0.2; hyprpicker --format hex | wl-copy"
           },
           {
             "label": "RGB",
-            "command": "hyprpicker --format rgb | wl-copy"
+            "command": "sleep 0.2; hyprpicker --format rgb | wl-copy"
           }
         ]
       },
