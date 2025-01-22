@@ -1,24 +1,21 @@
-// import { parseArgs } from "util";
-import help from "./src/help";
+import { parseArgs } from "util";
+import { showHelp, showVersion } from "./src/help";
 import { loadConfig, getConfig } from "./src/config";
 import menu from "./src/menu";
 import zoom from "./src/zoom";
 import toggle from "./src/toggle";
 import wallpaper from "./src/wallpaper";
 
-// const { values, positionals } = parseArgs({
-//   args: Bun.argv,
-//   strict: true,
-//   allowPositionals: true,
-// });
-//
-// console.log(values);
-// console.log(positionals);
+// Parse arguments
+const { values, positionals } = parseArgs({
+  args: Bun.argv,
+  strict: false,
+  allowPositionals: true,
+});
 
-const args = Bun.argv;
-const module = args[2];
-const target = args[3];
-const param = args[4];
+const module = positionals[2];
+const target = positionals[3];
+const param = positionals[4];
 
 // Initialize menu
 loadConfig()
@@ -45,6 +42,18 @@ function run() {
       wallpaper(moduleConfig, target, param);
       break;
     default:
-      help();
+      processNamedArgs(values);
+  }
+}
+
+/** @type {(args: Object{unknown}) => void} */
+function processNamedArgs(args) {
+  if (!args) {
+    return;
+  }
+  if (args.version) {
+    showVersion();
+  } else {
+    showHelp();
   }
 }
