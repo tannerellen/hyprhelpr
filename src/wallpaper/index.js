@@ -1,4 +1,4 @@
-import { executeCommand, listFiles } from "../system";
+import { executeCommand, listFiles, replaceRelativeHome } from "../system";
 
 const defaults = {
   cacheDirectory: "~/.cache/wallpapers",
@@ -90,5 +90,5 @@ function listWallpapers() {
 
 /** @type {() => void} */
 function createCacheDirectory() {
-  executeCommand(["mkdir", "-p", defaults.cacheDirectory]);
+  executeCommand(["mkdir", "-p", replaceRelativeHome(defaults.cacheDirectory)]);
 }
