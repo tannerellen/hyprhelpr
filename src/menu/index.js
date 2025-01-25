@@ -21,7 +21,6 @@ function run(entries) {
 
 /** @type {(entries: Array<LauncherEntry>, menuSelection: string) => void} */
 function launcherResult(entries, menuSelection) {
-  menuSelection = menuSelection.trim();
   for (const entry of entries) {
     if (
       menuSelection === entry.label ||

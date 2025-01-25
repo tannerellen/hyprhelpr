@@ -7,7 +7,7 @@ export function executeCommand(command, options) {
     const { stdout } = options
       ? Bun.spawnSync(command, options)
       : Bun.spawnSync(command);
-    return stdout.toString();
+    return stdout.toString().trim();
   } catch (err) {
     throw err;
   }
@@ -25,9 +25,7 @@ export function listFiles(directory, fileTypes) {
     "bash",
     "-c",
     `find -L "${replaceRelativeHome(directory)}" -type f ${typeFilter} | sed 's|.*/||'`,
-  ])
-    .trim()
-    .split("\n");
+  ]).split("\n");
 
   // I can't use bytcode compilation with the glob function so swap it out for
   // a bash find request

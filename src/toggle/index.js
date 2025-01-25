@@ -67,7 +67,7 @@ function configToCommand(command) {
     // Check first item for bin path
     if (!index) {
       const appPath = executeCommand(["which", part]);
-      part = appPath ? appPath.trim() : part;
+      part = appPath ? appPath : part;
     }
     // Replace home with aboslute path
     return replaceRelativeHome(part);
