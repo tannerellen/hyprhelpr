@@ -1,16 +1,11 @@
 import { executeCommand } from "../system";
+import { createModuleConfig } from "../config";
 
 let config = {};
 
-const defaults = {
-  default: 0.5,
-  fps: 60,
-  duration: 0.2,
-};
-
 /** @type {(target: string) => void} */
 export default function load(configInput, target) {
-  config = configInput;
+  config = createModuleConfig(configInput, getDefaults());
   const changeValue = !target ? 0 : parseFloat(target);
   run(changeValue);
 }
@@ -22,9 +17,7 @@ function run(changeValue) {
 
   if (!changeValue) {
     changeValue =
-      zoomFactor !== 1
-        ? 1 - zoomFactor
-        : parseFloat(config.default || defaults.default);
+      zoomFactor !== 1 ? 1 - zoomFactor : parseFloat(config.default);
   }
 
   if (config.animate) {
@@ -37,8 +30,8 @@ function run(changeValue) {
 
 /** @type {(startingZoomFactor: number, endingZoomFactor: number, delta: number) => void} */
 function animateZoom(currentZoomFactor, endingZoomFactor, delta) {
-  const animationTime = config.duration * 1000 || defaults.duration * 1000;
-  const fps = config.fps || defaults.fps;
+  const animationTime = config.duration * 1000;
+  const fps = config.fps;
   const frameDelay = 1000 / fps; // Tick time
   const animationStepAmount = delta / (animationTime / frameDelay);
 
@@ -74,4 +67,15 @@ function getZoomFactor() {
 function setZoomFactor(zoomFactor) {
   const commandArgs = ["hyprctl", "keyword", "cursor:zoom_factor", zoomFactor];
   executeCommand(commandArgs);
+}
+
+/** @type {() => Object} */
+function getDefaults() {
+  const defaults = {
+    default: 0.5,
+    fps: 60,
+    duration: 0.2,
+    animate: false,
+  };
+  return defaults;
 }

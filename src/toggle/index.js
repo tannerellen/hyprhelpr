@@ -1,4 +1,5 @@
 import { executeCommand, replaceRelativeHome } from "../system";
+import { createModuleConfig } from "../config";
 
 // Type definitions
 /** @typedef {{name: string, command: string, processMatch?: string, size?: string}} ToggleEntry */
@@ -6,13 +7,9 @@ import { executeCommand, replaceRelativeHome } from "../system";
 
 let config = {};
 
-const defaults = {
-  size: ">25% >25%",
-};
-
 /** @type {(config: MenuConfig) => void} */
 export default function load(configInput, name) {
-  config = configInput;
+  config = createModuleConfig(configInput, getDefaults());
   run(config.entries, name);
 }
 
@@ -40,7 +37,7 @@ function toggleSpecialWorkspace(entry) {
 
 /** @type {(entry: ToggleEntry) => void} */
 function launchApp(entry) {
-  const size = entry.size || defaults.size;
+  const size = entry.size || config.size;
   if (!entry.command) {
     console.log("No command specified");
     return;
@@ -73,4 +70,14 @@ function configToCommand(command) {
     return replaceRelativeHome(part);
   });
   return commandParts.join(" ");
+}
+
+/** @type {() => Object} */
+function getDefaults() {
+  const defaults = {
+    size: ">25% >25%",
+    entries: [],
+  };
+
+  return defaults;
 }

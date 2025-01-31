@@ -1,4 +1,5 @@
 import { executeCommand } from "../system";
+import { createModuleConfig } from "../config";
 
 // Type definitions
 /** @typedef {{label: string, command: string}} LauncherEntry */
@@ -9,7 +10,7 @@ let config = {};
 
 /** @type {(config: MenuConfig) => void} */
 export default async function load(configInput) {
-  config = configInput;
+  config = createModuleConfig(configInput, getDefaults());
   run(config.entries);
 }
 
@@ -62,4 +63,14 @@ function getInputFromEntries(entries) {
       return `${entry.label}${entry.next ? nextIndicator : ""}`;
     })
     .join("\n");
+}
+
+/** @type {() => Object} */
+function getDefaults() {
+  const defaults = {
+    command: "",
+    entries: [],
+  };
+
+  return defaults;
 }

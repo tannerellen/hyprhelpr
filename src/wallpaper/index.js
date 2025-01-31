@@ -1,15 +1,11 @@
-import { executeCommand, listFiles, replaceRelativeHome } from "../system";
-
-const defaults = {
-  cacheDirectory: "~/.cache/wallpapers",
-  cacheFile: "wallpaper",
-};
+import { executeCommand, listFiles } from "../system";
+import { createModuleConfig } from "../config";
 
 let config = {};
 
 /** @type {(configInput: Object, action?: string, path?: string) => void} */
 export default function load(configInput, action, path) {
-  config = configInput;
+  config = createModuleConfig(configInput, getDefaults());
   switch (action) {
     case "list":
       listWallpapers();
@@ -41,13 +37,13 @@ function copyToCache(file) {
   executeCommand([
     "bash",
     "-c",
-    `cp ${config.directory}/${file} ${defaults.cacheDirectory}/${defaults.cacheFile}`,
+    `cp ${config.directory}/${file} ${config.cacheDirectory}/${config.cacheFile}`,
   ]);
 }
 
 /** @type {(monitors: Array<string>) => void}*/
 function setWallpaper(monitors) {
-  const wallpaperToLoad = `${defaults.cacheDirectory}/${defaults.cacheFile}`;
+  const wallpaperToLoad = `${config.cacheDirectory}/${config.cacheFile}`;
 
   // Don't set the wallpaper if none exists
   if (!wallpaperToLoad) {
@@ -91,5 +87,15 @@ function listWallpapers() {
 
 /** @type {() => void} */
 function createCacheDirectory() {
-  executeCommand(["mkdir", "-p", replaceRelativeHome(defaults.cacheDirectory)]);
+  executeCommand(["mkdir", "-p", config.cacheDirectory]);
+}
+
+/** @type {() => Object} */
+function getDefaults() {
+  const defaults = {
+    cacheDirectory: "~/.cache/wallpapers",
+    cacheFile: "wallpaper",
+    directory: "~/Wallpapers",
+  };
+  return defaults;
 }
