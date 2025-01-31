@@ -53,7 +53,7 @@ function getAppIsRunning(entry) {
   const command = entry.processMatch
     ? entry.processMatch
     : configToCommand(entry.command).replace(/['"]/g, ""); // Remove quotes as they arn'te in the process
-  return executeBash(`pgrep -f ${command}`);
+  return executeBash(`pgrep -f "${command}"`);
 }
 
 /** @type {(command: string) => string} */
