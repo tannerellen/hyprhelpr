@@ -279,7 +279,7 @@ function getDefaults() {
     format: "mp4",
     onSaveCommands: "",
     onInterfaceUpdateCommand: "",
-    cacheDirectory: "~/.cache/screencasts",
+    cacheDirectory: "~/.cache/hyprhelpr/screencasts",
     directory: "~/Videos/Screencasts",
   };
 
