@@ -1,4 +1,4 @@
-import { executeCommand, replaceRelativeHome } from "../system";
+import { executeBash, replaceRelativeHome } from "../system";
 import { createModuleConfig } from "../config";
 
 // Type definitions
@@ -7,7 +7,7 @@ import { createModuleConfig } from "../config";
 
 let config = {};
 
-/** @type {(config: MenuConfig) => void} */
+/** @type {(configInput: ToggleConfig, name: string) => void} */
 export default function load(configInput, name) {
   config = createModuleConfig(configInput, getDefaults());
   run(config.entries, name);
@@ -32,7 +32,7 @@ async function run(entries, name) {
 
 /** @type {(entry: ToggleEntry) => void} */
 function toggleSpecialWorkspace(entry) {
-  executeCommand(["hyprctl", "dispatch", "togglespecialworkspace", entry.name]);
+  executeBash(`hyprctl dispatch togglespecialworkspace "${entry.name}"`);
 }
 
 /** @type {(entry: ToggleEntry) => void} */
@@ -43,11 +43,9 @@ function launchApp(entry) {
     return;
   }
   const command = configToCommand(entry.command);
-  executeCommand([
-    "bash",
-    "-c",
-    `hyprctl dispatch togglespecialworkspace ${entry.name} && hyprctl dispatch exec "[float; noanim; size ${size}] ${command}"`,
-  ]);
+  executeBash(
+    `hyprctl dispatch togglespecialworkspace "${entry.name}" && hyprctl dispatch exec "[float; noanim; size ${size}] ${command}"`,
+  );
 }
 
 /** @type {(entry: ToggleEntry) => string} */
@@ -55,7 +53,7 @@ function getAppIsRunning(entry) {
   const command = entry.processMatch
     ? entry.processMatch
     : configToCommand(entry.command).replace(/['"]/g, ""); // Remove quotes as they arn'te in the process
-  return executeCommand(["pgrep", "-f", `${command}`]);
+  return executeBash(`pgrep -f ${command}`);
 }
 
 /** @type {(command: string) => string} */
@@ -63,7 +61,7 @@ function configToCommand(command) {
   const commandParts = command.split(" ").map((part, index) => {
     // Check first item for bin path
     if (!index) {
-      const appPath = executeCommand(["which", part]);
+      const appPath = executeBash(`which ${part}`);
       part = appPath ? appPath : part;
     }
     // Replace home with aboslute path

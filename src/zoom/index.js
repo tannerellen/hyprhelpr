@@ -1,4 +1,4 @@
-import { executeCommand } from "../system";
+import { executeBash } from "../system";
 import { createModuleConfig } from "../config";
 
 let config = {};
@@ -58,15 +58,13 @@ function animateZoom(currentZoomFactor, endingZoomFactor, delta) {
 
 /** @type {() => number} */
 function getZoomFactor() {
-  const commandArgs = ["hyprctl", "getoption", "cursor:zoom_factor"];
-  const commandResult = executeCommand(commandArgs);
+  const commandResult = executeBash("hyprctl getoption cursor:zoom_factor");
   return parseFloat(commandResult.split("\n")[0].split(": ")[1]);
 }
 
 /** @type {(zoomFactor: number) => void} */
 function setZoomFactor(zoomFactor) {
-  const commandArgs = ["hyprctl", "keyword", "cursor:zoom_factor", zoomFactor];
-  executeCommand(commandArgs);
+  executeBash(`hyprctl keyword cursor:zoom_factor ${zoomFactor}`);
 }
 
 /** @type {() => Object} */

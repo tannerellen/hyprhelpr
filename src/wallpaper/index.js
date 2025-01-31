@@ -1,4 +1,4 @@
-import { executeCommand, listFiles } from "../system";
+import { executeBash, listFiles } from "../system";
 import { createModuleConfig } from "../config";
 
 let config = {};
@@ -34,11 +34,9 @@ function pickRandom() {
 
 /** @type {(file: string) => void} */
 function copyToCache(file) {
-  executeCommand([
-    "bash",
-    "-c",
+  executeBash(
     `cp ${config.directory}/${file} ${config.cacheDirectory}/${config.cacheFile}`,
-  ]);
+  );
 }
 
 /** @type {(monitors: Array<string>) => void}*/
@@ -51,26 +49,17 @@ function setWallpaper(monitors) {
     return;
   }
 
-  executeCommand(["hyprctl", "hyprpaper", "unload", "all"]);
-  executeCommand([
-    "bash",
-    "-c",
-    `hyprctl hyprpaper preload "${wallpaperToLoad}"`,
-  ]);
+  executeBash("hyprctl hyprpaper unload all");
+  executeBash(`hyprctl hyprpaper preload "${wallpaperToLoad}"`);
 
   for (const monitor of monitors) {
-    executeCommand([
-      "bash",
-      "-c",
-      `hyprctl hyprpaper wallpaper "${monitor},${wallpaperToLoad}"`,
-    ]);
+    executeBash(`hyprctl hyprpaper wallpaper "${monitor},${wallpaperToLoad}"`);
   }
 }
 
 /** @type {() => Array<string>} */
 function getMonitors() {
-  const commandArgs = ["hyprctl", "-j", "monitors"];
-  return JSON.parse(executeCommand(commandArgs)).map((monitor) => {
+  return JSON.parse(executeBash("hyprctl -j monitors")).map((monitor) => {
     return monitor.name;
   });
 }
@@ -87,7 +76,7 @@ function listWallpapers() {
 
 /** @type {() => void} */
 function createCacheDirectory() {
-  executeCommand(["mkdir", "-p", config.cacheDirectory]);
+  executeBash(`mkdir -p ${config.cacheDirectory}`);
 }
 
 /** @type {() => Object} */

@@ -1,4 +1,4 @@
-import { executeCommand } from "../system";
+import { executeBash } from "../system";
 import { createModuleConfig } from "../config";
 
 // Type definitions
@@ -32,12 +32,7 @@ function launcherResult(entries, menuSelection) {
       } else {
         try {
           // Run the command
-          executeCommand(
-            ["bash", "-c", `${entry.command} > /dev/null 2>&1 &`],
-            {
-              stdio: ["ignore"],
-            },
-          );
+          executeBash(`nohup ${entry.command} &`);
         } catch (err) {
           throw err;
         }
@@ -49,11 +44,7 @@ function launcherResult(entries, menuSelection) {
 
 /** @type {(input: string) => string} */
 function executeLauncher(input) {
-  return executeCommand([
-    "bash",
-    "-c",
-    `echo -e "${input}" | ${config.command}`,
-  ]);
+  return executeBash(`echo -e "${input}" | ${config.command}`);
 }
 
 /** @type {(entries: Array<LauncherEntry>) => string} */
