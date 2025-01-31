@@ -93,7 +93,7 @@ function createCacheDirectory() {
 /** @type {() => Object} */
 function getDefaults() {
   const defaults = {
-    cacheDirectory: "~/.cache/wallpapers",
+    cacheDirectory: "~/.cache/hyprhelpr/wallpapers",
     cacheFile: "wallpaper",
     directory: "~/Wallpapers",
   };
