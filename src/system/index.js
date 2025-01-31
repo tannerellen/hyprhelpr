@@ -13,6 +13,12 @@ export function executeCommand(command, options) {
   }
 }
 
+/** @type {(command: string, options?: Object<any>) => string} */
+export function executeBash(command, options) {
+  const commandArgs = ["bash", "-c", command];
+  return executeCommand(commandArgs, options);
+}
+
 /** @type {(directory: string, fileTypes: Array<string>) => Array<string>} */
 export function listFiles(directory, fileTypes) {
   const typeFilter = fileTypes
@@ -21,11 +27,9 @@ export function listFiles(directory, fileTypes) {
     })
     .join(" -o ");
 
-  return executeCommand([
-    "bash",
-    "-c",
+  return executeBash(
     `find -L "${replaceRelativeHome(directory)}" -type f ${typeFilter} | sed 's|.*/||'`,
-  ]).split("\n");
+  ).split("\n");
 
   // I can't use bytcode compilation with the glob function so swap it out for
   // a bash find request

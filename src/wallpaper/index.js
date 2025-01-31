@@ -7,6 +7,7 @@ const defaults = {
 
 let config = {};
 
+/** @type {(configInput: Object, action?: string, path?: string) => void} */
 export default function load(configInput, action, path) {
   config = configInput;
   switch (action) {

@@ -1,0 +1,296 @@
+import { executeBash, replaceRelativeHome } from "../system";
+import { createModuleConfig } from "../config";
+
+let config = {};
+let state = {};
+
+/** @type {(configInput: Object, action?: string, selection?: string, args?: Object) => void} */
+export default async function load(configInput, action, selection, args) {
+  config = createModuleConfig(configInput, getDefaults());
+  state = await getState();
+  switch (action) {
+    case "stop":
+      stop(args.savecommand);
+      break;
+    case "pause":
+      pause();
+      break;
+    default:
+      start(selection, args.savecommand);
+  }
+}
+
+/** @type {(selection?: string, saveCommandName?: number) => void} */
+function start(selection, saveCommandName) {
+  // If recording is already happening stop that and exit
+  if (isRecording()) {
+    stop(saveCommandName);
+    return;
+  }
+
+  createCacheDirectory();
+
+  const commandArgs = [config.recorderExec];
+
+  let region = state.region;
+  if (selection === "region") {
+    region = executeBash("slurp");
+  }
+
+  if (region) {
+    commandArgs.push(`-g "${region}"`);
+  }
+
+  // Create arguments for recorder app
+  commandArgs.push(...recorderArguments(config.recorderExec));
+
+  // Start recording
+  executeBash(`nohup ${commandArgs.join(" ")} &`);
+
+  saveState({ region, region });
+
+  // Start timer and bar display
+  timer();
+}
+
+/** @type {() => void} */
+function pause() {
+  // Stop recording
+  executeBash(`killall ${config.recorderExec}`);
+  // Kill timer
+  killTimer();
+  // Update ui with pause
+  executeBash(
+    `echo "${config.pauseIcon} paused" > "${config.recordingDisplayFile}"`,
+  );
+  // Run config callback
+  if (config.onInterfaceUpdateCommand) {
+    executeBash(config.onInterfaceUpdateCommand);
+  }
+  // Move temp cache file to named file
+  executeBash(
+    `mv "${config.cacheFilePath}" "${config.cacheDirectory}/${config.fileName}"`,
+  );
+  executeBash(
+    `find "${config.cacheDirectory}" -iname "*.${config.format}" |  sort |  sed 's:\ :\\\ :g'| sed 's/^/file /' > "${config.concatListFile}"`,
+  );
+}
+
+/** @type {(saveCommandName?: string) => void} */
+function stop(saveCommandName) {
+  executeBash(`killall ${config.recorderExec}`);
+  killTimer();
+  executeBash(
+    `echo "${config.recordingIcon} processing" > "${config.recordingDisplayFile}"`,
+  );
+  if (config.onInterfaceUpdateCommand) {
+    executeBash(config.onInterfaceUpdateCommand);
+  }
+
+  // Give a bit of time for the recording to write to disk
+  globalThis.setTimeout(() => {
+    // Save the video
+    save();
+    // Run save commands
+    runOnSaveCommands(saveCommandName);
+    // Clear recording ui
+    executeBash(`: > "${config.recordingDisplayFile}"`);
+    if (config.onInterfaceUpdateCommand) {
+      executeBash(config.onInterfaceUpdateCommand);
+    }
+    // Clear old cache files in case they exist
+    cleanCacheFolder();
+  }, 1000);
+}
+
+/** @type {() => Promise<void>} */
+async function save() {
+  // Make directory to store final screencast if necessary
+  executeBash(`mkdir -p ${config.directory}`);
+
+  if (concatFileExists()) {
+    // Make directory to store final screencast if necessary
+    executeBash(
+      `mv "${config.cacheFilePath}" "${config.cacheDirectory}/${config.fileName}"`,
+    );
+    // Find all video files in temp directory and add them to the concat list
+    executeBash(
+      `find "${config.cacheDirectory}" -iname "*.${config.format}" |  sort |  sed 's:\ :\\\ :g'| sed 's/^/file /' > "${config.concatListFile}"`,
+    );
+    // Use ffmpeg to concatenate individual files into one
+    executeBash(
+      `ffmpeg -f concat -safe 0 -i "${config.concatListFile}" -c copy "${config.cacheDirectory}/concat.${config.format}"`,
+    );
+    // Copy temporary file to final location
+    executeBash(
+      `cp "${config.cacheDirectory}/concat.${config.format}" "${config.filePath}"`,
+    );
+  } else {
+    // Copy single file to final location
+    executeBash(`cp "${config.cacheFilePath}" "${config.filePath}"`);
+  }
+}
+
+/** @type {(name?: string) => void} */
+function runOnSaveCommands(name) {
+  if (!config.onSaveCommands) {
+    return;
+  }
+
+  const commands = name
+    ? { [name]: config.onSaveCommands[name] }
+    : config.onSaveCommands;
+
+  for (const name in commands) {
+    executeBash(
+      `echo "${config.filePath}" | ${replaceRelativeHome(commands[name])}`,
+    );
+  }
+}
+
+/** @type {() => string} */
+function isRecording() {
+  return executeBash(`pgrep -x "${config.recorderExec}"`);
+}
+
+/** @type {() => void} */
+function createCacheDirectory() {
+  executeBash(`mkdir -p ${replaceRelativeHome(config.cacheDirectory)}`);
+}
+
+/** @type {() => void} */
+function killTimer() {
+  const timer = executeBash(`pgrep -f "## hyprhelpr screencast timer ##"`);
+  executeBash(`kill ${timer}`);
+}
+
+/** @type {() => void} */
+function cleanCacheFolder() {
+  executeBash(`rm -r ${config.cacheDirectory}`);
+}
+
+/** @type {() => void} */
+function timer() {
+  const lines = [
+    `## hyprhelpr screencast timer ##`,
+    `prefix="${config.recordingIcon} "`,
+    `display_file=${config.recordingDisplayFile}`,
+    `time_file=${config.recordingTimeFile}`,
+    `# Initialize the elapsed time`,
+    `if [[ -f "$time_file" ]]; then`,
+    `# Read the contents of the file into a variable`,
+    `offset=$(<"$time_file")`,
+    `else`,
+    `offset=0`,
+    `fi`,
+    `elapsed_time=$offset`,
+    `start_time=$(($(date +%s) + offset))`,
+
+    `# Function to display the elapsed time`,
+    `display_time() {`,
+    `printf "$prefix%02d:%02d:%02d" $((elapsed_time / 3600)) $(( (elapsed_time % 3600) / 60 )) $((elapsed_time % 60)) > "$display_file"`,
+    `echo $elapsed_time > "$time_file"`,
+    `pkill -RTMIN+2 waybar`,
+    `}`,
+    `while true; do`,
+    `current_time=$(($(date +%s) + offset))`,
+    `if [[ $((start_time - current_time)) != elapsed_time ]]; then`,
+    `display_time`,
+    `fi`,
+    `sleep 0.25`,
+    `elapsed_time=$((current_time - start_time + offset))`,
+    `done`,
+  ];
+  const proc = Bun.spawn(["bash", "-c", `${lines.join("\n")}`]);
+  proc.unref();
+}
+
+/** @type {(date: Date) => string} */
+function dateToString(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+}
+
+/** @type {(value: string) => string} */
+function pad(value) {
+  return `00${value}`.slice(-2);
+}
+
+/** @type {() => Promise<Object>} */
+async function getState() {
+  try {
+    const stateJson = Bun.file(config.recordingStateFile);
+    return await stateJson.json();
+  } catch (err) {
+    return {};
+  }
+}
+
+/** @type {(state: Object) => Promise<void>} */
+async function saveState(state) {
+  try {
+    await Bun.write(config.recordingStateFile, JSON.stringify(state));
+  } catch (err) {
+    throw err;
+  }
+}
+
+/** @type {() => boolean} */
+function concatFileExists() {
+  const concatFileExists = executeBash(
+    [`if [[ -f "${config.concatListFile}" ]]; then`, `echo true`, `fi`].join(
+      "\n",
+    ),
+  );
+  return concatFileExists === "true";
+}
+
+function recorderArguments(recorderExec) {
+  const defaults = {};
+
+  // Recorder defaults
+  defaults["wf-recorder"] = [
+    `--codec "libx264"`,
+    `--audio -C "aac"`,
+    `-p preset="superfast"`,
+    `-p vprofile="high"`,
+    `-p level="42"`,
+    `--file="${config.cacheFilePath}"`,
+  ];
+
+  defaults["wl-screenrec"] = [
+    `--audio`,
+    `--filename "${config.cacheFilePath}"`,
+  ];
+
+  const recorderArgs = config.recorderArgs
+    ? config.recorderArgs
+    : defaults[recorderExec];
+
+  return recorderArgs || [config.cacheFilePath];
+}
+
+/** @type {() => Object} */
+function getDefaults() {
+  const defaults = {
+    recorderExec: "wf-recorder",
+    filePrefix: "screen-recording",
+    recordingIcon: " ",
+    pauseIcon: "󰏤",
+    format: "mp4",
+    onSaveCommands: "",
+    onInterfaceUpdateCommand: "",
+    cacheDirectory: "~/.cache/screencasts",
+    directory: "~/Videos/Screencasts",
+  };
+
+  defaults.cacheFilePath = `${defaults.cacheDirectory}/${defaults.filePrefix}.${defaults.format}`;
+  defaults.recordingDisplayFile = `${defaults.cacheDirectory}/recording-display`;
+  defaults.recordingTimeFile = `${defaults.cacheDirectory}/recording-time`;
+  defaults.concatListFile = `${defaults.cacheDirectory}/concat-list`;
+  defaults.recordingStateFile = `${defaults.cacheDirectory}/recording-state`;
+
+  defaults.fileName = `${defaults.filePrefix}_${dateToString(new Date())}.${defaults.format}`;
+  defaults.filePath = `${defaults.directory}/${defaults.fileName}`;
+
+  return defaults;
+}

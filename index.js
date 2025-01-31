@@ -5,12 +5,24 @@ import menu from "./src/menu";
 import zoom from "./src/zoom";
 import toggle from "./src/toggle";
 import wallpaper from "./src/wallpaper";
+import screencast from "./src/screencast";
 
 // Parse arguments
 const { values, positionals } = parseArgs({
   args: Bun.argv,
   strict: false,
   allowPositionals: true,
+  options: {
+    help: {
+      type: "boolean",
+    },
+    version: {
+      type: "boolean",
+    },
+    savecommand: {
+      type: "string",
+    },
+  },
 });
 
 const module = positionals[2];
@@ -40,6 +52,9 @@ function run() {
       break;
     case "wallpaper":
       wallpaper(moduleConfig, target, param);
+      break;
+    case "screencast":
+      screencast(moduleConfig, target, param, values);
       break;
     default:
       processNamedArgs(values);

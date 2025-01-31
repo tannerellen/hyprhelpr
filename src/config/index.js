@@ -1,4 +1,5 @@
 import { homedir } from "os";
+import { replaceRelativeHome } from "../system";
 
 let config = {};
 
@@ -19,4 +20,21 @@ export async function loadConfig() {
 /** @type {(module?: string) => Object<unknown>} */
 export function getConfig(module) {
   return module ? config[module] || {} : config;
+}
+
+/** @type {(config: Object) => Object} */
+export function createModuleConfig(config, defaults) {
+  const configResult = {};
+
+  for (const property in defaults) {
+    const configValue = config[property]
+      ? config[property]
+      : defaults[property];
+
+    configResult[property] =
+      typeof configValue === "string"
+        ? replaceRelativeHome(configValue)
+        : configValue;
+  }
+  return configResult;
 }
