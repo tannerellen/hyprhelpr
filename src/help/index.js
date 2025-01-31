@@ -11,6 +11,10 @@ const helpLines = [
   "	- wallpaper <action> <path>",
   "		actions: set, list",
   "		path: the path to an image file is setting a specific image, leave blank for random",
+  "	- screencast <action> <selection> --savecommand",
+  "		actions: start, pause, stop",
+  "		selection: screen (default), region",
+  "		--savecommand: specifies user defined save command to run (default runs all)",
 ];
 
 /** @type {() => void} */
