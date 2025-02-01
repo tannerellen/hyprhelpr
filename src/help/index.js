@@ -15,6 +15,8 @@ const helpLines = [
   "		actions: start, pause, stop",
   "		selection: screen (default), region",
   "		--savecommand: specifies user defined save command to run (default runs all)",
+  "		--silent: will not record audio regardless of config",
+  "		--audio: will record audio regardless of config",
 ];
 
 /** @type {() => void} */
