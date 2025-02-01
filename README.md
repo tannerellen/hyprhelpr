@@ -121,11 +121,11 @@ Record your screen with either wl-screenrec or wf-recorder. Adds the ability to 
 
 **Usage:**
 ```
-hyprhelper screencast <action> <selection> --saveCommand
+hyprhelper screencast <action> <selection> --saveCommand <commandname> --silent --audio
 ```
 Examples:
 ```
-hyprhelpr screencast start screen 
+hyprhelpr screencast start screen --silent
 hyprhelpr screencast start region
 hyprhelpr screencast pause 
 hyprhelpr screencast stop --saveCommand directory
