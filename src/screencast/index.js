@@ -92,7 +92,7 @@ function stop(saveCommandName) {
     // Clear recording ui
     executeBash(`: > "${config.recordingDisplayFile}"`);
     if (config.onInterfaceUpdateCommand) {
-      executeBash(config.onInterfaceUpdateCommand);
+      executeBash(`echo "" | ${config.onInterfaceUpdateCommand}`);
     }
     // Clear old cache files in case they exist
     cleanCacheFolder();
@@ -135,7 +135,7 @@ function killRecorder(uiContent) {
   killTimer();
   executeBash(`echo "${uiContent}" > "${config.recordingDisplayFile}"`);
   if (config.onInterfaceUpdateCommand) {
-    executeBash(config.onInterfaceUpdateCommand);
+    executeBash(`echo "${uiContent}" | ${config.onInterfaceUpdateCommand}`);
   }
 }
 
@@ -196,9 +196,10 @@ function timer() {
 
     `# Function to display the elapsed time`,
     `display_time() {`,
-    `printf "$prefix%02d:%02d:%02d" $((elapsed_time / 3600)) $(( (elapsed_time % 3600) / 60 )) $((elapsed_time % 60)) > "$display_file"`,
-    `echo $elapsed_time > "$time_file"`,
-    `pkill -RTMIN+2 waybar`,
+    `display=$(printf "$prefix%02d:%02d:%02d" $((elapsed_time / 3600)) $(( (elapsed_time % 3600) / 60 )) $((elapsed_time % 60)))`,
+    `printf "$display" > "$display_file"`,
+    `echo "$elapsed_time" > "$time_file"`,
+    `echo "$display" | ${config.onInterfaceUpdateCommand}`,
     `}`,
     `while true; do`,
     `current_time=$(($(date +%s) + offset))`,
