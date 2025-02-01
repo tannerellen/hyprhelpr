@@ -72,7 +72,7 @@ function pause(selection, saveCommandName) {
 
   // Move temp cache file to named file
   executeBash(
-    `mv "${config.cacheFilePath}" "${config.cacheDirectory}/${config.fileName}"`,
+    `mv "${config.cacheFilePath}.${config.format}" "${config.cacheDirectory}/${config.fileName}.${config.format}"`,
   );
   executeBash(
     `find "${config.cacheDirectory}" -iname "*.${config.format}" |  sort |  sed 's:\ :\\\ :g'| sed 's/^/file /' > "${config.concatListFile}"`,
@@ -107,7 +107,7 @@ async function save() {
   if (concatFileExists()) {
     // Make directory to store final screencast if necessary
     executeBash(
-      `mv "${config.cacheFilePath}" "${config.cacheDirectory}/${config.fileName}"`,
+      `mv "${config.cacheFilePath}.${config.format}" "${config.cacheDirectory}/${config.fileName}.${config.format}"`,
     );
     // Find all video files in temp directory and add them to the concat list
     executeBash(
@@ -119,11 +119,13 @@ async function save() {
     );
     // Copy temporary file to final location
     executeBash(
-      `cp "${config.cacheDirectory}/concat.${config.format}" "${config.filePath}"`,
+      `cp "${config.cacheDirectory}/concat.${config.format}" "${config.filePath}.${config.format}"`,
     );
   } else {
     // Copy single file to final location
-    executeBash(`cp "${config.cacheFilePath}" "${config.filePath}"`);
+    executeBash(
+      `cp "${config.cacheFilePath}.${config.format}" "${config.filePath}.${config.format}"`,
+    );
   }
 }
 
@@ -149,7 +151,7 @@ function runOnSaveCommands(name) {
 
   for (const name in commands) {
     executeBash(
-      `echo "${config.filePath}" | ${replaceRelativeHome(commands[name])}`,
+      `echo "${config.filePath}.${config.format}" | ${replaceRelativeHome(commands[name])}`,
     );
   }
 }
@@ -260,12 +262,12 @@ function recorderArguments(recorderExec) {
     `-p preset="superfast"`,
     `-p vprofile="high"`,
     `-p level="42"`,
-    `--file="${config.cacheFilePath}"`,
+    `--file="${config.cacheFilePath}.${config.format}"`,
   ];
 
   defaults["wl-screenrec"] = [
     `--audio`,
-    `--filename "${config.cacheFilePath}"`,
+    `--filename "${config.cacheFilePath}.${config.format}"`,
   ];
 
   const recorderArgs = config.recorderArgs
@@ -294,13 +296,13 @@ function getDefaults() {
     directory: "~/Videos/Screencasts",
   };
 
-  defaults.cacheFilePath = `${defaults.cacheDirectory}/${defaults.filePrefix}.${defaults.format}`;
+  defaults.cacheFilePath = `${defaults.cacheDirectory}/${defaults.filePrefix}`;
   defaults.recordingDisplayFile = `${defaults.cacheDirectory}/recording-display`;
   defaults.recordingTimeFile = `${defaults.cacheDirectory}/recording-time`;
   defaults.concatListFile = `${defaults.cacheDirectory}/concat-list`;
   defaults.recordingStateFile = `${defaults.cacheDirectory}/recording-state`;
 
-  defaults.fileName = `${defaults.filePrefix}_${dateToString(new Date())}.${defaults.format}`;
+  defaults.fileName = `${defaults.filePrefix}_${dateToString(new Date())}`;
   defaults.filePath = `${defaults.directory}/${defaults.fileName}`;
 
   return defaults;
