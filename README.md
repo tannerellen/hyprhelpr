@@ -131,7 +131,10 @@ Then your onInterfaceUpdateCommand would look like:
 ```
 pkill -RTMIN+2 waybar
 ```
-This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/screencasts/recording-display file which is automatically created and updated by hyprhelpr.
+This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/screencasts/recording-display file which is automatically created and updated by hyprhelpr. The command will also receive the display value as stdin so you can use it directly in a command for example if you wanted to write it to another file:
+```
+echo $(cat) > ~/test.txt
+```
 - onSaveCommands: An object containing any commands to run on save. These are named commands so that they can be called individually or the default is to run all of them. The syntax is:
 ```
 "onSaveCommands": {
