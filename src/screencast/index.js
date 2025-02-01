@@ -272,7 +272,11 @@ function recorderArguments(recorderExec) {
     ? config.recorderArgs
     : defaults[recorderExec];
 
-  return recorderArgs || [config.cacheFilePath];
+  return config.silent
+    ? recorderArgs.filter((arg) => {
+        return !arg.startsWith("--audio");
+      })
+    : recorderArgs;
 }
 
 /** @type {() => Object} */
@@ -280,6 +284,7 @@ function getDefaults() {
   const defaults = {
     recorderExec: "wf-recorder",
     filePrefix: "screen-recording",
+    silent: false,
     recordingIcon: " ",
     pauseIcon: "󰏤",
     format: "mp4",
