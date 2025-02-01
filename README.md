@@ -1,5 +1,5 @@
 # HyprHelpr
-A useful tool for Hyprland to make common tasks easier. Create custom menus, toggle apps in a special workspace, magnify your screen with zoom, and set wallpapers easily with Hyprpaper.
+A useful tool for Hyprland to make common tasks easier. Screencasting with pause / resume, create custom menus, toggle apps in a special workspace, magnify your screen with zoom, and set wallpapers easily with Hyprpaper.
 
 ## Table of Contents
 - [Installation](#Instalation-and-Usage)
