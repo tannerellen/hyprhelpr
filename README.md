@@ -119,13 +119,13 @@ Record your screen with either wl-screenrec or wf-recorder. Adds the ability to 
 - silent: A boolean (true, false), if true no audio will be recorded.
 - onInterfaceUpdateCommand: A command that runs every time the interface needs to be updated. This is every second to adjust the timer and when recording pauses or stops. An example of this is to update a custom waybar module with the current recording state. For example you could create this custom waybar module:
 ```
-	"custom/screencast": {
-		"exec": "cat ~/.cache/hyprhelpr/screencasts/recording-display",
-		"format": "{}",
-		"interval": "once",
-        "on-click": "hyprhelpr screencast pause",
-		"signal": 2
-	},
+"custom/screencast": {
+    "exec": "cat ~/.cache/hyprhelpr/screencasts/recording-display",
+    "format": "{}",
+    "interval": "once",
+    "on-click": "hyprhelpr screencast pause",
+    "signal": 2
+},
 ```
 Then your onInterfaceUpdateCommand would look like:
 ```
