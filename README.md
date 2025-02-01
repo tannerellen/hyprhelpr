@@ -1,6 +1,17 @@
 # HyprHelpr
 A useful tool for Hyprland to make common tasks easier. Create custom menus, toggle apps in a special workspace, magnify your screen with zoom, and set wallpapers easily with Hyprpaper.
 
+## Table of Contents
+- [Installation](#Instalation-and-Usage)
+- [Modules](#Modules)
+    - [Menu](#Menu)
+    - [App Toggle](#Toggle)
+    - [Screen Zoom](#Zoom)
+    - [Wallpaper](#Wallpaper)
+    - [Screencast](#Screencast)
+- [Sample Config](#Config)
+- [Run From Source](#Run-FromSource)
+
 ## Installation and Usage
 Download the latest release, unzip and copy the app into any folder in your $PATH like /usr/local/bin/
 Alternatively you can launch the app from any directory by specifying the path to it's location like ~/MyApps/hyprhelpr
@@ -99,8 +110,59 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 ```
 
 ### Screencast
+Record your screen with either wl-screenrec or wf-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
 
-**Coming soon**
+**Config properties:**
+- recorderExec: The app that will record the screencast for example "wl-screenrec" or "wf-recorder". Default "wf-recorder".
+- directory: The directory where the screencast will be saved. Default "~/Videos/Screencasts/"
+- onInterfaceUpdateCommand: A command that runs every time the interface needs to be updated. This is every second to adjust the timer and when recording pauses or stops. An example of this is to update a custom waybar module with the current recording state. For example you could create this custom waybar module:
+```
+	"custom/screencast": {
+		"exec": "cat ~/.cache/hyprhelpr/screencasts/recording-display",
+		"format": "{}",
+		"interval": "once",
+        "on-click": "hyprhelpr screencast pause",
+		"signal": 2
+	},
+```
+Then your onInterfaceUpdateCommand would look like:
+```
+pkill -RTMIN+2 waybar
+```
+This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/screencasts/recording-display file which is automatically created and updated by hyprhelpr.
+- onSaveCommands: An object containing any commands to run on save. These are named commands so that they can be called individually or the default is to run all of them. The syntax is:
+```
+"onSaveCommands": {
+    "directory": "nohup xargs thunar &",
+    "upload": "~/pathtoscript/upload.sh"
+}
+```
+By default all on save commands will run but you can specify --savecommand <name> ie --savecommand upload to run only a specific save command when recording is complete.
+
+The path to the saved file is piped into any onSaveCommand entered. For example if you want to create a script that uploads you may want to assign a variable to the file path to act on the file:
+```
+#!/bin/bash
+
+filePath=$(cat)
+fileName=$(basename "$filePath")
+```
+
+**Usage:**
+```
+hyprhelper screencast <action> <target> --saveCommand
+```
+Examples:
+```
+hyprhelpr screencast start screen 
+hyprhelpr screencast start region
+hyprhelpr screencast pause 
+hyprhelpr screencast stop --saveCommand directory
+```
+The default recording is "screen" so that is optional
+
+**Requires:**
+- [wl-screenrec](https://github.com/russelltg/wl-screenrec) or [wf-recorder](https://github.com/ammen99/wf-recorder)
+- [slurp](https://github.com/emersion/slurp) for region recording
 
 ## Config
 **Save a json formatted config file to: ~/.config/hyprhelpr/config.json**
@@ -117,6 +179,14 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
   },
   "wallpaper": {
     "directory": "~/Wallpapers"
+  },
+  "screencast": {
+    "recorderExec": "wl-screenrec",
+    "directory": "~/Videos/Screencasts/",
+    "onSaveCommands": {
+      "thunar": "nohup xargs thunar &"
+    },
+    "onInterfaceUpdateCommand": "pkill -RTMIN+2 waybar"
   },
   "toggle": {
     "entries": [
