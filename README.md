@@ -149,7 +149,7 @@ fileName=$(basename "$filePath")
 
 **Usage:**
 ```
-hyprhelper screencast <action> <target> --saveCommand
+hyprhelper screencast <action> <selection> --saveCommand
 ```
 Examples:
 ```
