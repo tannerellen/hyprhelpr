@@ -13,14 +13,14 @@ export default async function load(configInput, action, selection, args) {
       stop(args.savecommand);
       break;
     case "pause":
-      pause();
+      pause(selection, args.savecommand);
       break;
     default:
       start(selection, args.savecommand);
   }
 }
 
-/** @type {(selection?: string, saveCommandName?: number) => void} */
+/** @type {(selection?: string, saveCommandName?: string) => void} */
 function start(selection, saveCommandName) {
   // If recording is already happening stop that and exit
   if (isRecording()) {
@@ -53,20 +53,16 @@ function start(selection, saveCommandName) {
   timer();
 }
 
-/** @type {() => void} */
-function pause() {
-  // Stop recording
-  executeBash(`killall ${config.recorderExec}`);
-  // Kill timer
-  killTimer();
-  // Update ui with pause
-  executeBash(
-    `echo "${config.pauseIcon} paused" > "${config.recordingDisplayFile}"`,
-  );
-  // Run config callback
-  if (config.onInterfaceUpdateCommand) {
-    executeBash(config.onInterfaceUpdateCommand);
+/** @type {(selection?: string, saveCommandName?: string) => void} */
+function pause(selection, saveCommandName) {
+  // If recording isn't already happening start that and exit
+  if (!isRecording()) {
+    start(selection, saveCommandName);
+    return;
   }
+
+  killRecorder(`${config.pauseIcon} paused`);
+
   // Move temp cache file to named file
   executeBash(
     `mv "${config.cacheFilePath}" "${config.cacheDirectory}/${config.fileName}"`,
@@ -78,14 +74,7 @@ function pause() {
 
 /** @type {(saveCommandName?: string) => void} */
 function stop(saveCommandName) {
-  executeBash(`killall ${config.recorderExec}`);
-  killTimer();
-  executeBash(
-    `echo "${config.recordingIcon} processing" > "${config.recordingDisplayFile}"`,
-  );
-  if (config.onInterfaceUpdateCommand) {
-    executeBash(config.onInterfaceUpdateCommand);
-  }
+  killRecorder(`${config.recordingIcon} processing`);
 
   // Give a bit of time for the recording to write to disk
   globalThis.setTimeout(() => {
@@ -131,6 +120,16 @@ async function save() {
   }
 }
 
+/** @type {(uiContent: string) => void} */
+function killRecorder(uiContent) {
+  executeBash(`killall ${config.recorderExec}`);
+  killTimer();
+  executeBash(`echo "${uiContent}" > "${config.recordingDisplayFile}"`);
+  if (config.onInterfaceUpdateCommand) {
+    executeBash(config.onInterfaceUpdateCommand);
+  }
+}
+
 /** @type {(name?: string) => void} */
 function runOnSaveCommands(name) {
   if (!config.onSaveCommands) {
@@ -159,14 +158,14 @@ function createCacheDirectory() {
 }
 
 /** @type {() => void} */
-function killTimer() {
-  const timer = executeBash(`pgrep -f "## hyprhelpr screencast timer ##"`);
-  executeBash(`kill ${timer}`);
+function cleanCacheFolder() {
+  executeBash(`rm -r ${config.cacheDirectory}`);
 }
 
 /** @type {() => void} */
-function cleanCacheFolder() {
-  executeBash(`rm -r ${config.cacheDirectory}`);
+function killTimer() {
+  const timer = executeBash(`pgrep -f "## hyprhelpr screencast timer ##"`);
+  executeBash(`kill ${timer}`);
 }
 
 /** @type {() => void} */
