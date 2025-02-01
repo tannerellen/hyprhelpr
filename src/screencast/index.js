@@ -3,9 +3,11 @@ import { createModuleConfig } from "../config";
 
 let config = {};
 let state = {};
+let args = {};
 
-/** @type {(configInput: Object, action?: string, selection?: string, args?: Object) => void} */
-export default async function load(configInput, action, selection, args) {
+/** @type {(configInput: Object, action?: string, selection?: string, argsInput?: Object) => void} */
+export default async function load(configInput, action, selection, argsInput) {
+  args = argsInput;
   config = createModuleConfig(configInput, getDefaults());
   state = await getState();
   // Check external dependency
@@ -17,21 +19,21 @@ export default async function load(configInput, action, selection, args) {
   }
   switch (action) {
     case "stop":
-      stop(args.savecommand);
+      stop();
       break;
     case "pause":
-      pause(selection, args.savecommand);
+      pause();
       break;
     default:
-      start(selection, args.savecommand);
+      start(selection);
   }
 }
 
-/** @type {(selection?: string, saveCommandName?: string) => void} */
-function start(selection, saveCommandName) {
+/** @type {(selection?: string) => void} */
+function start(selection) {
   // If recording is already happening stop that and exit
   if (isRecording()) {
-    stop(saveCommandName);
+    stop();
     return;
   }
 
@@ -60,11 +62,11 @@ function start(selection, saveCommandName) {
   timer();
 }
 
-/** @type {(selection?: string, saveCommandName?: string) => void} */
-function pause(selection, saveCommandName) {
+/** @type {(selection?: string) => void} */
+function pause(selection) {
   // If recording isn't already happening start that and exit
   if (!isRecording()) {
-    start(selection, saveCommandName);
+    start(selection);
     return;
   }
 
@@ -79,8 +81,8 @@ function pause(selection, saveCommandName) {
   );
 }
 
-/** @type {(saveCommandName?: string) => void} */
-function stop(saveCommandName) {
+/** @type {() => void} */
+function stop() {
   killRecorder(`${config.recordingIcon} processing`);
 
   // Give a bit of time for the recording to write to disk
@@ -88,7 +90,7 @@ function stop(saveCommandName) {
     // Save the video
     save();
     // Run save commands
-    runOnSaveCommands(saveCommandName);
+    runOnSaveCommands(args.savecommand);
     // Clear recording ui
     executeBash(`: > "${config.recordingDisplayFile}"`);
     if (config.onInterfaceUpdateCommand) {
@@ -275,7 +277,7 @@ function recorderArguments(recorderExec) {
     ? config.recorderArgs
     : defaults[recorderExec];
 
-  return config.silent
+  return (config.silent && !args.audio) || args.silent
     ? recorderArgs.filter((arg) => {
         return !arg.startsWith("--audio");
       })
