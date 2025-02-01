@@ -1,4 +1,4 @@
-import { executeBash, replaceRelativeHome } from "../system";
+import { executeBash, replaceRelativeHome, dependencyExists } from "../system";
 import { createModuleConfig } from "../config";
 
 let config = {};
@@ -8,6 +8,13 @@ let state = {};
 export default async function load(configInput, action, selection, args) {
   config = createModuleConfig(configInput, getDefaults());
   state = await getState();
+  // Check external dependency
+  if (!dependencyExists(config.recorderExec)) {
+    console.log(
+      `Recorder app ${config.recorderExec} does not exist on this system`,
+    );
+    return;
+  }
   switch (action) {
     case "stop":
       stop(args.savecommand);

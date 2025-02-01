@@ -19,6 +19,11 @@ export function executeBash(command, options) {
   return executeCommand(commandArgs, options);
 }
 
+/** @type {(dependency: string) => boolean} */
+export function dependencyExists(dependency) {
+  return !!executeBash(`which ${dependency}`);
+}
+
 /** @type {(directory: string, fileTypes: Array<string>) => Array<string>} */
 export function listFiles(directory, fileTypes) {
   const typeFilter = fileTypes
