@@ -115,6 +115,8 @@ Record your screen with either wl-screenrec or wf-recorder. Adds the ability to 
 **Config properties:**
 - recorderExec: The app that will record the screencast for example "wl-screenrec" or "wf-recorder". Default "wf-recorder".
 - directory: The directory where the screencast will be saved. Default "~/Videos/Screencasts/"
+- format: The video container format (mp4, mkv), the default is mp4 if not specified.
+- silent: A boolean (true, false), if true no audio will be recorded.
 - onInterfaceUpdateCommand: A command that runs every time the interface needs to be updated. This is every second to adjust the timer and when recording pauses or stops. An example of this is to update a custom waybar module with the current recording state. For example you could create this custom waybar module:
 ```
 	"custom/screencast": {
@@ -183,6 +185,7 @@ The default recording is "screen" so that is optional
   "screencast": {
     "recorderExec": "wl-screenrec",
     "directory": "~/Videos/Screencasts/",
+    "silent": false,
     "onSaveCommands": {
       "thunar": "nohup xargs thunar &"
     },
