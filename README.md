@@ -42,6 +42,11 @@ The menu module is used to create menu functionality in any dmenu based app. Thi
 
 Outputs a list of menu items that can be piped into any dmenu compatible launcher.
 
+**Usage:**
+```
+hyprhelpr menu
+```
+
 **Config properties:**
 
 - label: Human readable label string that will appear as the menu text.
@@ -50,13 +55,14 @@ Outputs a list of menu items that can be piped into any dmenu compatible launche
 
 - next: Optional array that will indicate there is another sub menu. This can be an empty array if the command itself will bring up a sub menu or can contain an array of objects that contain the proproperties listed above.`
 
-**Usage:**
-```
-hyprhelpr menu
-```
 
 ### Toggle
 Toggle allows easy setup to toggle apps in hyprland's special workspaces. This works great to quickly show an app and then hide it. Especially usefull for things like interacting with notes, calculator, music players or any other app that you want quick access to but doesn't need to be on screen all the time.
+
+**Usage:**
+```
+hyprhelper toggle <name specified in config>
+```
 
 **Config properties:**
 
@@ -71,13 +77,13 @@ Toggle allows easy setup to toggle apps in hyprland's special workspaces. This w
     - size: A size string in the format that Hyprland window rules uses, ie. "25% 50%".
     
 
-**Usage:**
-```
-hyprhelper toggle <name specified in config>
-```
-
 ### Zoom
 Zoom in on your cursor position. Can be animated or instant. If no zoom amount is specified it will toggle between the zoom amount specified in the config and not zoomed at all.
+
+**Usage:**
+```
+hyprhelper zoom <optional zoom change amount>
+```
 
 **Config properties:**
 
@@ -89,10 +95,6 @@ Zoom in on your cursor position. Can be animated or instant. If no zoom amount i
 
 - fps: A number specifying how many frames per second the animation will target. Anything under 60 will look choppy. You can experiment with this to get a smooth zoom. 120 provides a very smooth zoom animation.
 
-**Usage:**
-```
-hyprhelper zoom <optional zoom change amount>
-```
 
 ### Wallpaper
 Set a random wallpaper or specific one from a directory. Can set a specific wallpaper if a path is specified or set a random wallpaper if no path is specified. List will list all wallpapers in the directory specified in the config. Useful for passing wallpapers to dmenu.
@@ -100,17 +102,35 @@ Set a random wallpaper or specific one from a directory. Can set a specific wall
 **Requires:**
 [Hyprpaper](https://wiki.hyprland.org/Hypr-Ecosystem/hyprpaper/)
 
-**Config properties:**
-
-- directory: The path string to the directory containing wallpapers.
-
 **Usage:**
 ```
 hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 ```
 
+**Config properties:**
+
+- directory: The path string to the directory containing wallpapers.
+
+
 ### Screencast
 Record your screen with either wl-screenrec or wf-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
+
+**Requires:**
+- [wl-screenrec](https://github.com/russelltg/wl-screenrec) or [wf-recorder](https://github.com/ammen99/wf-recorder)
+- [slurp](https://github.com/emersion/slurp) for region recording
+
+**Usage:**
+```
+hyprhelper screencast <action> <selection> --saveCommand
+```
+Examples:
+```
+hyprhelpr screencast start screen 
+hyprhelpr screencast start region
+hyprhelpr screencast pause 
+hyprhelpr screencast stop --saveCommand directory
+```
+The default recording is "screen" so that is optional
 
 **Config properties:**
 - recorderExec: The app that will record the screencast for example "wl-screenrec" or "wf-recorder". Default "wf-recorder".
@@ -152,22 +172,6 @@ filePath=$(cat)
 fileName=$(basename "$filePath")
 ```
 
-**Usage:**
-```
-hyprhelper screencast <action> <selection> --saveCommand
-```
-Examples:
-```
-hyprhelpr screencast start screen 
-hyprhelpr screencast start region
-hyprhelpr screencast pause 
-hyprhelpr screencast stop --saveCommand directory
-```
-The default recording is "screen" so that is optional
-
-**Requires:**
-- [wl-screenrec](https://github.com/russelltg/wl-screenrec) or [wf-recorder](https://github.com/ammen99/wf-recorder)
-- [slurp](https://github.com/emersion/slurp) for region recording
 
 ## Config
 **Save a json formatted config file to: ~/.config/hyprhelpr/config.json**
