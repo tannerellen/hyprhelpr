@@ -6,6 +6,7 @@ import zoom from "./src/zoom";
 import toggle from "./src/toggle";
 import wallpaper from "./src/wallpaper";
 import screencast from "./src/screencast";
+import screenshare from "./src/screenshare";
 
 // Parse arguments
 const { values, positionals } = parseArgs({
@@ -55,6 +56,9 @@ function run() {
       break;
     case "screencast":
       screencast(moduleConfig, target, param, values);
+      break;
+    case "screenshare":
+      screenshare(moduleConfig);
       break;
     default:
       processNamedArgs(values);
