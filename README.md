@@ -111,6 +111,39 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 
 - directory: The path string to the directory containing wallpapers.
 
+### Screenshare
+A very simple tool for selecting screenshare screens, windows, or a region for [xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/). This will list you share sources in whatever dmenu capable app you specify in the config. A nice feature is this will automatically debounce screenshare requests. This means in apps that ask what you want to share more than once will no longer do so. The default debounce duration is 5 seconds but this can be modified in the config.
+**Requires:**
+[xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/)
+[slurp](https://github.com/emersion/slurp) - For region selection
+
+**Usage:**
+```
+hyprhelper screenshare
+```
+This will need to be called from xdg-desktop-portal-hyprland. However this will work best if called via a bash script. So create a simple bash script:
+```
+#!/bin/bash/
+/usr/local/bin/hyprhelpr screenshare
+```
+Then save that somewhere easy to reference like ~/.config/hypr/scripts/share-picker.sh. Once saved make it executable:
+```
+chmod +x ~/.config/hyr/scripts/share-picker.sh
+```
+Now finally reference that script in the ~/.config/hypr/xdph.conf file:
+```
+screencopy {
+	max_fps = 120
+	allow_token_by_default = true
+	custom_picker_binary = $HOME/.config/hypr/scripts/share-picker.sh
+}
+```
+You will need to restart for that change to take affect. Make sure to add a screenshare section to your config with at least a menuCommand property. See the example config for how that would look.
+
+**Config properties:**
+
+- menuCommand: The command to run to show the list of share sources in a menu. For example "fuzzel --dmenu", the list of sources are piped into the command.
+- debounceDuration: An optional number in seconds to wait before bringing up the share menu again. The default is 5 seconds.
 
 ### Screencast
 Record your screen with either wl-screenrec or wf-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
@@ -188,6 +221,9 @@ fileName=$(basename "$filePath")
   },
   "wallpaper": {
     "directory": "~/Wallpapers"
+  },
+  "screenshare": {
+    "menuCommand": "walker --dmenu --keepsort"
   },
   "screencast": {
     "recorderExec": "wl-screenrec",
