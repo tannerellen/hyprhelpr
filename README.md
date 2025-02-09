@@ -8,6 +8,7 @@ A useful tool for Hyprland to make common tasks easier. Screencasting with pause
     - [App Toggle](#Toggle)
     - [Screen Zoom](#Zoom)
     - [Wallpaper](#Wallpaper)
+    - [Screenshare](#Screenshare)
     - [Screencast](#Screencast)
 - [Sample Config](#Config)
 - [Run From Source](#Run-FromSource)
@@ -113,9 +114,10 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 
 ### Screenshare
 A very simple tool for selecting screenshare screens, windows, or a region for [xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/). This will list you share sources in whatever dmenu capable app you specify in the config. A nice feature is this will automatically debounce screenshare requests. This means in apps that ask what you want to share more than once will no longer do so. The default debounce duration is 5 seconds but this can be modified in the config.
+
 **Requires:**
-[xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/)
-[slurp](https://github.com/emersion/slurp) - For region selection
+- [xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/)
+- [slurp](https://github.com/emersion/slurp) - For region selection
 
 **Usage:**
 ```
