@@ -65,7 +65,7 @@ function run() {
   }
 }
 
-/** @type {(args: Object{unknown}) => void} */
+/** @type {(args: {[key: string]: any}) => void} */
 function processNamedArgs(args) {
   if (!args) {
     return;
