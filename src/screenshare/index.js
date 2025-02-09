@@ -4,7 +4,7 @@ import { createModuleConfig } from "../config";
 // Type definitions
 /** @typedef {{}} ConfigInput */
 
-/** @typedef {{cacheDirectory: string, cacheFile: string, debounceDuration: number}} Config */
+/** @typedef {{menuCommand: string, cacheDirectory: string, cacheFile: string, debounceDuration: number}} Config */
 
 /** @type {Config} */
 let config;
@@ -40,7 +40,7 @@ async function selectSource() {
 
   const output = generateOutput(selectionListMap.get(selection));
   if (!output) {
-    console.log("no output");
+    console.log("");
     return;
   }
 
@@ -139,7 +139,7 @@ function generateSelectionList() {
 
 /** @type {(list: string) => string} */
 function showSelectionList(list) {
-  return executeBash(`echo "${list}" | walker --dmenu --keepsort`);
+  return executeBash(`echo "${list}" | ${config.menuCommand}`);
 }
 
 /** @type {() => void} */
@@ -150,6 +150,7 @@ function createCacheDirectory() {
 /** @type {() => Config} */
 function getDefaults() {
   const defaults = {
+    menuCommand: "",
     cacheDirectory: "~/.cache/hyprhelpr/screenshare",
     cacheFile: "debounce",
     debounceDuration: 5,
