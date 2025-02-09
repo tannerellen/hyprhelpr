@@ -2,25 +2,29 @@ import { executeBash } from "../system";
 import { createModuleConfig } from "../config";
 
 // Type definitions
-/** @typedef {{label: string, command: string}} LauncherEntry */
-/** @typedef {{engine: string, parameters: string, entries: Array<LauncherEntry>}} MenuConfig */
+/** @typedef {{}} ConfigInput */
+
+/** @typedef {{label: string, command: string, next?: []}} LauncherEntry */
+
+/** @typedef {{command: string, parameters: string, entries: LauncherEntry[]}} Config */
 
 const nextIndicator = "  ➜";
-let config = {};
+/** @type {Config} */
+let config;
 
-/** @type {(config: MenuConfig) => void} */
+/** @type {(config: ConfigInput) => Promise<void>} */
 export default async function load(configInput) {
   config = createModuleConfig(configInput, getDefaults());
   run(config.entries);
 }
 
-/** @type {(entries: LauncherEntry) => void} */
+/** @type {(entries: LauncherEntry[]) => void} */
 function run(entries) {
   const menuSelection = executeLauncher(getInputFromEntries(entries));
   launcherResult(entries, menuSelection);
 }
 
-/** @type {(entries: Array<LauncherEntry>, menuSelection: string) => void} */
+/** @type {(entries: LauncherEntry[], menuSelection: string) => void} */
 function launcherResult(entries, menuSelection) {
   for (const entry of entries) {
     if (
@@ -47,7 +51,7 @@ function executeLauncher(input) {
   return executeBash(`echo -e "${input}" | ${config.command}`);
 }
 
-/** @type {(entries: Array<LauncherEntry>) => string} */
+/** @type {(entries: LauncherEntry[]) => string} */
 function getInputFromEntries(entries) {
   return entries
     .map((entry) => {
@@ -56,7 +60,7 @@ function getInputFromEntries(entries) {
     .join("\n");
 }
 
-/** @type {() => Object} */
+/** @type {() => {}} */
 function getDefaults() {
   const defaults = {
     command: "",

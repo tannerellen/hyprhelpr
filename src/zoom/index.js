@@ -1,9 +1,15 @@
 import { executeBash } from "../system";
 import { createModuleConfig } from "../config";
 
-let config = {};
+// Type definitions
+/** @typedef {{}} ConfigInput */
 
-/** @type {(target: string) => void} */
+/** @typedef {{default: number | string, animate: boolean, duration: number, fps: number}} Config */
+
+/** @type {Config} */
+let config;
+
+/** @type {(configInput: ConfigInput, target: string) => void} */
 export default function load(configInput, target) {
   config = createModuleConfig(configInput, getDefaults());
   const changeValue = !target ? 0 : parseFloat(target);
@@ -17,7 +23,11 @@ function run(changeValue) {
 
   if (!changeValue) {
     changeValue =
-      zoomFactor !== 1 ? 1 - zoomFactor : parseFloat(config.default);
+      zoomFactor !== 1
+        ? 1 - zoomFactor
+        : typeof config.default === "number"
+          ? config.default
+          : parseFloat(config.default);
   }
 
   if (config.animate) {
@@ -67,7 +77,7 @@ function setZoomFactor(zoomFactor) {
   executeBash(`hyprctl keyword cursor:zoom_factor ${zoomFactor}`);
 }
 
-/** @type {() => Object} */
+/** @type {() => {}} */
 function getDefaults() {
   const defaults = {
     default: 0.5,

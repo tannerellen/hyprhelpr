@@ -2,22 +2,30 @@ import { executeBash, replaceRelativeHome } from "../system";
 import { createModuleConfig } from "../config";
 
 // Type definitions
-/** @typedef {{name: string, command: string, processMatch?: string, size?: string}} ToggleEntry */
-/** @typedef {{entries: Array<LauncherEntry>}} ToggleConfig */
+/** @typedef {{}} ConfigInput */
 
-let config = {};
+/** @typedef {{name: string, command: string, size?: string, processMatch?: string}} ToggleEntry */
 
-/** @type {(configInput: ToggleConfig, name: string) => void} */
+/** @typedef {{size: string, entries: ToggleEntry[]}} Config */
+
+/** @type {Config} */
+let config;
+
+/** @type {(configInput: ConfigInput, name: string) => void} */
 export default function load(configInput, name) {
   config = createModuleConfig(configInput, getDefaults());
   run(config.entries, name);
 }
 
-/** @type {(entries: Array<ToggleEntry>) => Promise} */
+/** @type {(entries: ToggleEntry[], name: string) => Promise<void>} */
 async function run(entries, name) {
   const target = entries.find((entry) => {
     return entry.name === name;
   });
+
+  if (!target) {
+    return;
+  }
 
   const pid = getAppIsRunning(target);
 
@@ -70,7 +78,7 @@ function configToCommand(command) {
   return commandParts.join(" ");
 }
 
-/** @type {() => Object} */
+/** @type {() => {}} */
 function getDefaults() {
   const defaults = {
     size: ">25% >25%",

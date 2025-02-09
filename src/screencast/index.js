@@ -1,11 +1,25 @@
 import { executeBash, replaceRelativeHome, dependencyExists } from "../system";
 import { createModuleConfig } from "../config";
 
-let config = {};
-let state = {};
-let args = {};
+// Type definitions
+/** @typedef {{}} ConfigInput */
 
-/** @type {(configInput: Object, action?: string, selection?: string, argsInput?: Object) => void} */
+/** @typedef {{[key: string]: string}} OnSaveCommands */
+
+/** @typedef {{cacheDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean}} Config */
+
+/** @typedef {{region: string}} State */
+
+/** @typedef {{savecommand?: string, silent?: boolean, audio?: boolean}} Args*/
+
+/** @type {Config} */
+let config;
+/** @type {State} */
+let state;
+/** @type {Args} */
+let args;
+
+/** @type {(configInput: ConfigInput, action?: string, selection?: string, argsInput?: any) => Promise<void>} */
 export default async function load(configInput, action, selection, argsInput) {
   args = argsInput;
   config = createModuleConfig(configInput, getDefaults());
@@ -56,7 +70,7 @@ function start(selection) {
   // Start recording
   executeBash(`nohup ${commandArgs.join(" ")} &`);
 
-  saveState({ region, region });
+  saveState({ region });
 
   // Start timer and bar display
   timer();
@@ -221,12 +235,12 @@ function dateToString(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
 }
 
-/** @type {(value: string) => string} */
+/** @type {(value: string | number) => string} */
 function pad(value) {
   return `00${value}`.slice(-2);
 }
 
-/** @type {() => Promise<Object>} */
+/** @type {() => Promise<any>} */
 async function getState() {
   try {
     const stateJson = Bun.file(config.recordingStateFile);
@@ -236,7 +250,7 @@ async function getState() {
   }
 }
 
-/** @type {(state: Object) => Promise<void>} */
+/** @type {(state: State) => Promise<void>} */
 async function saveState(state) {
   try {
     await Bun.write(config.recordingStateFile, JSON.stringify(state));
@@ -255,7 +269,9 @@ function concatFileExists() {
   return concatFileExists === "true";
 }
 
+/** @type {(recorderExec: string) => string[]} */
 function recorderArguments(recorderExec) {
+  /** @type {{[key: string]: string[]}} */
   const defaults = {};
 
   // Recorder defaults
@@ -278,14 +294,15 @@ function recorderArguments(recorderExec) {
     : defaults[recorderExec];
 
   return (config.silent && !args.audio) || args.silent
-    ? recorderArgs.filter((arg) => {
+    ? recorderArgs.filter((/** @type{string} */ arg) => {
         return !arg.startsWith("--audio");
       })
     : recorderArgs;
 }
 
-/** @type {() => Object} */
+/** @type {() => {}} */
 function getDefaults() {
+  /** @type {{[key: string]: any}} */
   const defaults = {
     recorderExec: "wf-recorder",
     filePrefix: "screen-recording",

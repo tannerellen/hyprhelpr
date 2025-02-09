@@ -3,6 +3,7 @@ import { createModuleConfig } from "../config";
 
 // Type definitions
 /** @typedef {{}} ConfigInput */
+
 /** @typedef {{cacheDirectory: string, cacheFile: string, debounceDuration: number}} Config */
 
 /** @type {Config} */

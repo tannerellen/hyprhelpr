@@ -1,7 +1,7 @@
 import { homedir } from "os";
 // import { Glob } from "bun";
 
-/** @type {(command: Array<string>, options?: Object<any>) => string} */
+/** @type {(command: string[], options?: {}) => string} */
 export function executeCommand(command, options) {
   try {
     const { stdout } = options
@@ -13,7 +13,7 @@ export function executeCommand(command, options) {
   }
 }
 
-/** @type {(command: string, options?: Object<any>) => string} */
+/** @type {(command: string, options?: {}) => string} */
 export function executeBash(command, options) {
   const commandArgs = ["bash", "-c", command];
   return executeCommand(commandArgs, options);
@@ -24,7 +24,7 @@ export function dependencyExists(dependency) {
   return !!executeBash(`which ${dependency}`);
 }
 
-/** @type {(directory: string, fileTypes: Array<string>) => Array<string>} */
+/** @type {(directory: string, fileTypes: string[]) => string[]} */
 export function listFiles(directory, fileTypes) {
   const typeFilter = fileTypes
     .map((type) => {

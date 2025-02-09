@@ -31,6 +31,7 @@ export async function showVersion() {
     const version = packageJson.version;
     console.log(`v${version}`);
   } catch (err) {
-    console.log(`The version number could not be read: ${err.message}`);
+    const message = err instanceof Error ? err.message : err;
+    console.log(`The version number could not be read: ${message}`);
   }
 }

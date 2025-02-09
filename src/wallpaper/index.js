@@ -1,9 +1,15 @@
 import { executeBash, listFiles } from "../system";
 import { createModuleConfig } from "../config";
 
-let config = {};
+// Type definitions
+/** @typedef {{}} ConfigInput */
 
-/** @type {(configInput: Object, action?: string, path?: string) => void} */
+/** @typedef {{cacheDirectory: string, cacheFile: string, directory: string, debounceDuration: number}} Config */
+
+/** @type {Config} */
+let config;
+
+/** @type {(configInput: ConfigInput, action?: string, path?: string) => void} */
 export default function load(configInput, action, path) {
   config = createModuleConfig(configInput, getDefaults());
   switch (action) {
@@ -18,6 +24,7 @@ export default function load(configInput, action, path) {
   }
 }
 
+/** @type {(file?: string) => void} */
 function run(file) {
   const monitors = getMonitors();
   createCacheDirectory();
@@ -59,9 +66,11 @@ function setWallpaper(monitors) {
 
 /** @type {() => Array<string>} */
 function getMonitors() {
-  return JSON.parse(executeBash("hyprctl -j monitors")).map((monitor) => {
-    return monitor.name;
-  });
+  return JSON.parse(executeBash("hyprctl -j monitors")).map(
+    (/** @type {{name: string}} */ monitor) => {
+      return monitor.name;
+    },
+  );
 }
 
 /** @type {() => Array<string>} */
@@ -69,7 +78,7 @@ function getWallpapers() {
   return listFiles(config.directory, ["jpg", "png", "jpeg"]);
 }
 
-/** @type {() => {}} */
+/** @type {() => void} */
 function listWallpapers() {
   console.log(getWallpapers().join("\n"));
 }
