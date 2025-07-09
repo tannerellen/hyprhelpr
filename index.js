@@ -5,6 +5,7 @@ import menu from "./src/menu";
 import zoom from "./src/zoom";
 import toggle from "./src/toggle";
 import wallpaper from "./src/wallpaper";
+import indicator from "./src/indicator";
 import screencast from "./src/screencast";
 import screenshare from "./src/screenshare";
 
@@ -21,6 +22,9 @@ const { values, positionals } = parseArgs({
       type: "boolean",
     },
     savecommand: {
+      type: "string",
+    },
+    content: {
       type: "string",
     },
   },
@@ -53,6 +57,9 @@ function run() {
       break;
     case "wallpaper":
       wallpaper(moduleConfig, target, param);
+      break;
+    case "indicator":
+      indicator(moduleConfig, target, param, values);
       break;
     case "screencast":
       screencast(moduleConfig, target, param, values);

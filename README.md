@@ -10,6 +10,7 @@ A useful tool for Hyprland to make common tasks easier. Screencasting with pause
     - [Wallpaper](#Wallpaper)
     - [Screenshare](#Screenshare)
     - [Screencast](#Screencast)
+    - [Indicator](#Indicator)
 - [Sample Config](#Config)
 - [Run From Source](#Run-FromSource)
 
@@ -112,6 +113,7 @@ hyprhelper wallpaper <operation (set or list)> <optional wallpaper path>
 
 - directory: The path string to the directory containing wallpapers.
 
+
 ### Screenshare
 A very simple tool for selecting screenshare screens, windows, or a region for [xdg-desktop-portal-hyprland](https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/). This will list you share sources in whatever dmenu capable app you specify in the config. A nice feature is this will automatically debounce screenshare requests. This means in apps that ask what you want to share more than once will no longer do so. The default debounce duration is 5 seconds but this can be modified in the config.
 
@@ -147,6 +149,7 @@ You will need to restart for that change to take affect. Make sure to add a scre
 - menuCommand: The command to run to show the list of share sources in a menu. For example "fuzzel --dmenu", the list of sources are piped into the command.
 - debounceDuration: An optional number in seconds to wait before bringing up the share menu again. The default is 5 seconds.
 
+
 ### Screencast
 Record your screen with either wl-screenrec or wf-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
 
@@ -168,6 +171,7 @@ hyprhelpr screencast stop --saveCommand directory
 The default recording is "screen" so that is optional
 
 **Config properties:**
+
 - recorderExec: The app that will record the screencast for example "wl-screenrec" or "wf-recorder". Default "wf-recorder".
 - directory: The directory where the screencast will be saved. Default "~/Videos/Screencasts/"
 - format: The video container format (mp4, mkv), the default is mp4 if not specified.
@@ -208,6 +212,46 @@ fileName=$(basename "$filePath")
 ```
 
 
+### Indicator
+A simple indicator that is meant to display in a bar like waybar. This can be used for simple short messages or for animations to indicate loading.
+
+```
+hyprhelper indicator <action> <name> [--content <content string>]
+```
+
+Examples:
+```
+hyprhelpr indicator start loading
+hyprhelpr indicator stop
+hyprhelpr indicator start loading --content "Opening app"
+```
+
+**Config properties:**
+
+- entries: A JSON object that contains properties for how to display the indicator. The first property is the message identifier which will contain another object with configuration properties. The properties available to this object are:
+    - entries: An array of objects that will contain the properties listed below representing the different indicator configurations.
+    - name: A unique string specifying the indicator entry.
+    - content: A text string to display.
+    - animation: An array of text to animate through. Each array item is an animation frame.
+
+- onInterfaceUpdateCommand: A command that runs every time the interface needs to be updated. This is used to update the display for the next animated frame. Usually used to update something like waybar. For example you could create this custom waybar module:
+```
+"custom/indicator": {
+    "exec": "cat ~/.cache/hyprhelpr/indicator/indicator-display",
+    "format": "{}",
+    "interval": "once",
+    "signal": 3
+},
+```
+Then your onInterfaceUpdateCommand would look like:
+```
+pkill -RTMIN+2 waybar
+```
+This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/indicator/indicator-display file which is automatically created and updated by hyprhelpr. The command will also receive the display value as stdin so you can use it directly in a command for example if you wanted to write it to another file:
+```
+echo $(cat) > ~/test.txt
+```
+
 ## Config
 **Save a json formatted config file to: ~/.config/hyprhelpr/config.json**
 
@@ -235,6 +279,17 @@ fileName=$(basename "$filePath")
       "thunar": "nohup xargs thunar &"
     },
     "onInterfaceUpdateCommand": "pkill -RTMIN+2 waybar"
+  },
+  "indicator": {
+    "onInterfaceUpdateCommand": "pkill -RTMIN+3 waybar",
+    "entries": [
+      {
+        "name": "loading",
+        "content": "",
+        "animation": ["●∙∙", "∙●∙", "∙∙●"],
+        "frameDelay": 0.25
+      }
+    ]
   },
   "toggle": {
     "entries": [
