@@ -228,8 +228,7 @@ hyprhelpr indicator start loading --content "Opening app"
 
 **Config properties:**
 
-- entries: A JSON object that contains properties for how to display the indicator. The first property is the message identifier which will contain another object with configuration properties. The properties available to this object are:
-    - entries: An array of objects that will contain the properties listed below representing the different indicator configurations.
+- entries: An array of objects that will contain the properties listed below representing the different indicator configurations.
     - name: A unique string specifying the indicator entry.
     - content: A text string to display.
     - animation: An array of text to animate through. Each array item is an animation frame.
