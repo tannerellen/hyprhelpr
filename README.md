@@ -244,7 +244,7 @@ hyprhelpr indicator start loading --content "Opening app"
 ```
 Then your onInterfaceUpdateCommand would look like:
 ```
-pkill -RTMIN+2 waybar
+pkill -RTMIN+3 waybar
 ```
 This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/indicator/indicator-display file which is automatically created and updated by hyprhelpr. The command will also receive the display value as stdin so you can use it directly in a command for example if you wanted to write it to another file:
 ```
