@@ -17,6 +17,9 @@ export default function load(configInput, action, path) {
       listWallpapers();
       break;
     case "set":
+      if (!path) {
+        return;
+      }
       run(path);
       break;
     default:
@@ -25,6 +28,7 @@ export default function load(configInput, action, path) {
 }
 
 /** @type {(file?: string) => void} */
+// /todo we should change the actions to set, random, list. So then the run function could change to set and create a new function for random
 function run(file) {
   const monitors = getMonitors();
   createCacheDirectory();
