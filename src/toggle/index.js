@@ -4,7 +4,7 @@ import { createModuleConfig } from "../config";
 // Type definitions
 /** @typedef {{}} ConfigInput */
 
-/** @typedef {{name: string, command: string, size?: string, processMatch?: string}} ToggleEntry */
+/** @typedef {{name: string, command: string, size?: string, move?: string, processMatch?: string}} ToggleEntry */
 
 /** @typedef {{size: string, entries: ToggleEntry[]}} Config */
 
@@ -46,13 +46,14 @@ function toggleSpecialWorkspace(entry) {
 /** @type {(entry: ToggleEntry) => void} */
 function launchApp(entry) {
   const size = entry.size || config.size;
+  const move = entry.move ? `move ${entry.move}` : "center";
   if (!entry.command) {
     console.log("No command specified");
     return;
   }
   const command = configToCommand(entry.command);
   executeBash(
-    `hyprctl dispatch togglespecialworkspace "${entry.name}" && hyprctl dispatch exec "[float; noanim; size ${size}] ${command}"`,
+    `hyprctl dispatch togglespecialworkspace "${entry.name}" && hyprctl dispatch exec "[float; noanim; size ${size}; ${move};] ${command}"`,
   );
 }
 
