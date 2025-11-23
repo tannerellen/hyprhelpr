@@ -76,8 +76,9 @@ hyprhelper toggle <name specified in config>
 
     - processMatch: An optional string for hyprhelpr to match the running process to know if the app is already running or not. Sometimes the way you launch an app isn't the actual process that is running so this is useful for those situations. For example running the flatpak for gedit with "flatpak run gedit" will not actually run that process but will open a process of just "gedit". See the example config for how to handle that situation. You can use a tool like btop or just ps aux | grep "app name" to see what a good string would be to use here if needed.
 
-    - size: A size string in the format that Hyprland window rules uses, ie. "25% 50%".
-    
+    - size: An optional size string in the format that Hyprland window rules uses, ie. "1024 768" or "window_w window_h".
+
+    - move: An optional position to move the window to. Will default to center if not set. Uses the Hyprland window rules format, ie. "100 10".
 
 ### Zoom
 Zoom in on your cursor position. Can be animated or instant. If no zoom amount is specified it will toggle between the zoom amount specified in the config and not zoomed at all.
