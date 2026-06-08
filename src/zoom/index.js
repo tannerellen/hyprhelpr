@@ -74,7 +74,9 @@ function getZoomFactor() {
 
 /** @type {(zoomFactor: number) => void} */
 function setZoomFactor(zoomFactor) {
-  executeBash(`hyprctl keyword cursor:zoom_factor ${zoomFactor}`);
+  executeBash(
+    `hyprctl dispatch 'hl.config({cursor = {zoom_factor = ${zoomFactor}}})'`,
+  );
 }
 
 /** @type {() => {}} */

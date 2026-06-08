@@ -74,11 +74,13 @@ hyprhelper toggle <name specified in config>
     
     - command: The command string used to launch the app. If the app is used more places than the toggle it is recommended to make the launch string contain unique identifiers like --class some-class. By default hyprhelpr will use the command as the processMatch to determine if the app is already running or not.
 
+    - raw: An optional boolean indicating if the command string should be passed as is and not processed. This is useful if your command launches a script that applies window sizes or other properties rather than relying on hyprhelpr.
+
     - processMatch: An optional string for hyprhelpr to match the running process to know if the app is already running or not. Sometimes the way you launch an app isn't the actual process that is running so this is useful for those situations. For example running the flatpak for gedit with "flatpak run gedit" will not actually run that process but will open a process of just "gedit". See the example config for how to handle that situation. You can use a tool like btop or just ps aux | grep "app name" to see what a good string would be to use here if needed.
 
-    - size: An optional size string in the format that Hyprland window rules uses, ie. "1024 768" or "window_w window_h".
+    - size: An optional size string in the format that Hyprland window rules uses, ie. "{1024, 768}" or "{\\\"window_w\\\", \\\"window_h\\\"}".
 
-    - move: An optional position to move the window to. Will default to center if not set. Uses the Hyprland window rules format, ie. "100 10".
+    - move: An optional position to move the window to. Will default to center if not set. Uses the Hyprland window rules format, ie. "{100, 10}".
 
 ### Zoom
 Zoom in on your cursor position. Can be animated or instant. If no zoom amount is specified it will toggle between the zoom amount specified in the config and not zoomed at all.
@@ -269,7 +271,7 @@ echo $(cat) > ~/test.txt
     "directory": "~/Wallpapers"
   },
   "screenshare": {
-    "menuCommand": "walker --dmenu --keepsort"
+    "menuCommand": "rofi -dmenu -i"
   },
   "screencast": {
     "recorderExec": "wl-screenrec",
@@ -286,44 +288,44 @@ echo $(cat) > ~/test.txt
       {
         "name": "loading",
         "content": "",
-        "animation": ["●∙∙", "∙●∙", "∙∙●"],
+        "animation": ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"],
         "frameDelay": 0.25
       }
     ]
   },
   "toggle": {
     "entries": [
-      {
+          {
         "name": "term-calc",
-        "command": "kitty --class term-calc -e kalc",
-        "size": "30% 40%"
+        "command": "kitty --class=me.term-calc -e kalc",
+        "size": "{500, 400}"
       },
       {
         "name": "term-notes",
-        "command": "kitty --class term-notes -e nvim -c 'cd ~/Documents/Notes/Tanner/'",
-        "size": "80% 80%"
+        "command": "kitty --class=me.term-notes -e nvim -c 'cd ~/Notes/Tanner/'",
+        "size": "{\"monitor_w/1.3\", \"monitor_h/1.3\"}"
       },
       {
-        "name": "pavucontrol",
-        "command": "pavucontrol",
-        "size": "40% 80%"
+        "name": "sound-control",
+        "command": "~/.scripts/audio.sh output",
+        "size": "{680, 800}"
       },
       {
-        "name": "gedit",
-        "command": "flatpak run org.gnome.gedit --class gedit-toggle",
-        "processMatch": "^gedit --class gedit-toggle",
-        "size": "60% 80%"
+        "name": "music",
+        "command": "~/.local/share/appimage/cider.appimage",
+        "size": "{1300, \"monitor_h/1.15\"}"
+      },
+      {
+        "name": "claude",
+        "command": "~/.local/share/launcherscripts/claude.sh \"{size = {\\\"monitor_w/1.8\\\", \\\"monitor_h/1.2\\\"}, float = true}\"",
+        "raw": true,
+        "processMatch": "[--]name claude-widget"
       }
     ]
   },
   "menu": {
-    "command": "walker --dmenu --keepsort",
+    "command": "rofi -dmenu -i",
     "entries": [
-      {
-        "label": "Connect To Server",
-        "command": "walker -m ssh",
-        "next": []
-      },
       {
         "label": "Color Picker",
         "command": "",
@@ -340,7 +342,7 @@ echo $(cat) > ~/test.txt
       },
       {
         "label": "Set Wallpaper",
-        "command": "bun run hyprhelpr wallpaper set \"$(hyprhelpr wallpaper list | walker --dmenu --keepsort)\"",
+        "command": "hyprhelpr wallpaper set \"$(hyprhelpr wallpaper list | rofi -dmenu -i)\"",
         "next": []
       }
     ]

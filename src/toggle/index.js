@@ -4,7 +4,7 @@ import { createModuleConfig } from "../config";
 // Type definitions
 /** @typedef {{}} ConfigInput */
 
-/** @typedef {{name: string, command: string, size?: string, move?: string, processMatch?: string}} ToggleEntry */
+/** @typedef {{name: string, command: string, size?: string, move?: string, processMatch?: string, raw?: boolean}} ToggleEntry */
 
 /** @typedef {{size: string, entries: ToggleEntry[]}} Config */
 
@@ -40,7 +40,9 @@ async function run(entries, name) {
 
 /** @type {(entry: ToggleEntry) => void} */
 function toggleSpecialWorkspace(entry) {
-  executeBash(`hyprctl dispatch togglespecialworkspace "${entry.name}"`);
+  executeBash(
+    `hyprctl dispatch 'hl.dsp.workspace.toggle_special("${entry.name}")'`,
+  );
 }
 
 /** @type {(entry: ToggleEntry) => void} */
@@ -52,9 +54,16 @@ function launchApp(entry) {
     return;
   }
   const command = configToCommand(entry.command);
-  executeBash(
-    `hyprctl dispatch togglespecialworkspace "${entry.name}" && hyprctl dispatch exec "[float; noanim; size ${size}; ${move};] ${command}"`,
-  );
+
+  if (entry.raw) {
+    executeBash(
+      `hyprctl dispatch 'hl.dsp.workspace.toggle_special("${entry.name}")' && ${command}`,
+    );
+  } else {
+    executeBash(
+      `hyprctl dispatch 'hl.dsp.workspace.toggle_special("${entry.name}")' && hyprctl dispatch 'hl.dsp.exec_cmd("${command}", {size = ${size}, move = ${move}, float = true, no_anim = true})'`,
+    );
+  }
 }
 
 /** @type {(entry: ToggleEntry) => string} */
@@ -82,7 +91,7 @@ function configToCommand(command) {
 /** @type {() => {}} */
 function getDefaults() {
   const defaults = {
-    size: ">25% >25%",
+    size: '{"monitor_w/1.5", "monitor_h/1.2"}',
     entries: [],
   };
 
