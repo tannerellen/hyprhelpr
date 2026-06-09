@@ -1,5 +1,5 @@
-import { executeBash, replaceRelativeHome, dependencyExists } from '../system';
-import { createModuleConfig } from '../config';
+import { executeBash, replaceRelativeHome, dependencyExists } from "../system";
+import { createModuleConfig } from "../config";
 
 // Type definitions
 /** @typedef {{}} ConfigInput */
@@ -32,10 +32,10 @@ export default async function load(configInput, action, selection, argsInput) {
     return;
   }
   switch (action) {
-    case 'stop':
+    case "stop":
       stop();
       break;
-    case 'pause':
+    case "pause":
       pause();
       break;
     default:
@@ -51,7 +51,7 @@ function start(selection) {
     return;
   }
 
-  if (selection === 'portal' && config.recorderExec !== 'gpu-screen-recorder') {
+  if (selection === "portal" && config.recorderExec !== "gpu-screen-recorder") {
     console.log(
       `${config.recorderExec} does not support portal capture, use gpu-screen-recorder for portal mode`,
     );
@@ -63,8 +63,8 @@ function start(selection) {
   const commandArgs = [config.recorderExec];
 
   let region = state.region;
-  if (selection === 'region') {
-    region = executeBash('slurp');
+  if (selection === "region") {
+    region = executeBash("slurp");
   }
 
   // Create arguments for recorder app
@@ -73,7 +73,7 @@ function start(selection) {
   );
 
   // Start recording
-  executeBash(`nohup ${commandArgs.join(' ')} &`);
+  executeBash(`nohup ${commandArgs.join(" ")} &`);
 
   saveState({ region });
 
@@ -236,7 +236,7 @@ function timer() {
     `elapsed_time=$((current_time - start_time + offset))`,
     `done`,
   ];
-  const proc = Bun.spawn(['bash', '-c', `${lines.join('\n')}`]);
+  const proc = Bun.spawn(["bash", "-c", `${lines.join("\n")}`]);
   proc.unref();
 }
 
@@ -273,16 +273,16 @@ async function saveState(state) {
 function concatFileExists() {
   const concatFileExists = executeBash(
     [`if [[ -f "${config.concatListFile}" ]]; then`, `echo true`, `fi`].join(
-      '\n',
+      "\n",
     ),
   );
-  return concatFileExists === 'true';
+  return concatFileExists === "true";
 }
 
 /** @type {(region?: string) => string} */
 function slurpRegionToGsrRegion(region) {
   if (!region) {
-    return '';
+    return "";
   }
 
   // slurp format: "x,y widthxheight"
@@ -294,7 +294,7 @@ function slurpRegionToGsrRegion(region) {
 
   // If already in gpu-screen-recorder format then use as-is.
   const gsrRegionMatch = region.match(/^\d+x\d+\+\d+\+\d+$/);
-  return gsrRegionMatch ? region : '';
+  return gsrRegionMatch ? region : "";
 }
 
 /** @type {(recorderExec: string, selection?: string, region?: string) => string[]} */
@@ -303,32 +303,32 @@ function recorderArguments(recorderExec, selection, region) {
   const defaults = {};
 
   // Recorder defaults
-  defaults['wf-recorder'] = [
+  defaults["wf-recorder"] = [
     `--codec "libx264"`,
     `--audio -C "aac"`,
     `-p preset="superfast"`,
     `-p vprofile="high"`,
     `-p level="42"`,
     `--file="${config.cacheFilePath}.${config.format}"`,
-    selection === 'region' && region ? `-g "${region}"` : `-g screen`,
+    selection === "region" && region ? `-g "${region}"` : `-g screen`,
   ];
 
-  defaults['wl-screenrec'] = [
+  defaults["wl-screenrec"] = [
     `--audio`,
     `--filename "${config.cacheFilePath}.${config.format}"`,
-    selection === 'region' && region
+    selection === "region" && region
       ? `--geometry "${region}"`
       : `--geometry screen`,
   ];
 
   const gsrRegion = slurpRegionToGsrRegion(region);
-  defaults['gpu-screen-recorder'] = [
-    selection === 'portal'
+  defaults["gpu-screen-recorder"] = [
+    selection === "portal"
       ? `-w portal`
-      : selection === 'region'
+      : selection === "region"
         ? `-w region`
         : `-w screen`,
-    ...(selection === 'region' && gsrRegion ? [`-region ${gsrRegion}`] : []),
+    ...(selection === "region" && gsrRegion ? [`-region ${gsrRegion}`] : []),
     `-f 15`,
     `-k h264`,
     `-a default_output`,
@@ -342,7 +342,7 @@ function recorderArguments(recorderExec, selection, region) {
 
   return (config.silent && !args.audio) || args.silent
     ? recorderArgs.filter((/** @type{string} */ arg) => {
-        return !arg.startsWith('--audio') && !arg.startsWith('-a ');
+        return !arg.startsWith("--audio") && !arg.startsWith("-a ");
       })
     : recorderArgs;
 }
@@ -351,16 +351,16 @@ function recorderArguments(recorderExec, selection, region) {
 function getDefaults() {
   /** @type {{[key: string]: any}} */
   const defaults = {
-    recorderExec: 'wf-recorder',
-    filePrefix: 'screen-recording',
+    recorderExec: "wf-recorder",
+    filePrefix: "screen-recording",
     silent: false,
-    recordingIcon: ' ',
-    pauseIcon: '󰏤',
-    format: 'mp4',
-    onSaveCommands: '',
-    onInterfaceUpdateCommand: '',
-    cacheDirectory: '~/.cache/hyprhelpr/screencasts',
-    directory: '~/Videos/Screencasts',
+    recordingIcon: " ",
+    pauseIcon: "󰏤",
+    format: "mp4",
+    onSaveCommands: "",
+    onInterfaceUpdateCommand: "",
+    cacheDirectory: "~/.cache/hyprhelpr/screencasts",
+    directory: "~/Videos/Screencasts",
   };
 
   defaults.cacheFilePath = `${defaults.cacheDirectory}/${defaults.filePrefix}`;
