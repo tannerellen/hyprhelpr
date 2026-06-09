@@ -179,7 +179,7 @@ function runOnSaveCommands(name) {
 
 /** @type {() => string} */
 function isRecording() {
-  return executeBash(`pgrep -x "${config.recorderExec}"`);
+  return executeBash(`pgrep -f "${config.recorderExec}"`);
 }
 
 /** @type {() => void} */
