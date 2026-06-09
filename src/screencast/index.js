@@ -179,7 +179,8 @@ function runOnSaveCommands(name) {
 
 /** @type {() => string} */
 function isRecording() {
-  return executeBash(`pgrep -x "${config.recorderExec}"`);
+  // Limit exec to first 15 characters as that is the most pgrep -x can return
+  return executeBash(`pgrep -x "${config.recorderExec.slice(0, 15)}"`);
 }
 
 /** @type {() => void} */
