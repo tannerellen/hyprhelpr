@@ -154,10 +154,10 @@ You will need to restart for that change to take affect. Make sure to add a scre
 
 
 ### Screencast
-Record your screen with either wl-screenrec or wf-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
+Record your screen with wl-screenrec, wf-recorder, or gpu-screen-recorder. Adds the ability to pause recording, display status in the ui like a timer in waybar. You can also add commands to run on each timer increment and on save. This allows you to upload recorded video or show the folder it's saved in for example.
 
 **Requires:**
-- [wl-screenrec](https://github.com/russelltg/wl-screenrec) or [wf-recorder](https://github.com/ammen99/wf-recorder)
+- [wl-screenrec](https://github.com/russelltg/wl-screenrec) or [wf-recorder](https://github.com/ammen99/wf-recorder) or [gpu-screen-recorder](https://git.dec05eba.com/gpu-screen-recorder/about/)
 - [slurp](https://github.com/emersion/slurp) for region recording
 
 **Usage:**
@@ -168,14 +168,15 @@ Examples:
 ```
 hyprhelpr screencast start screen --silent
 hyprhelpr screencast start region
+hyprhelpr screencast start portal
 hyprhelpr screencast pause 
 hyprhelpr screencast stop --saveCommand directory
 ```
-The default recording is "screen" so that is optional
+The default recording is "screen" so that is optional. "portal" selection currently requires recorderExec set to "gpu-screen-recorder".
 
 **Config properties:**
 
-- recorderExec: The app that will record the screencast for example "wl-screenrec" or "wf-recorder". Default "wf-recorder".
+- recorderExec: The app that will record the screencast for example "wl-screenrec", "wf-recorder", or "gpu-screen-recorder". Default "wf-recorder".
 - directory: The directory where the screencast will be saved. Default "~/Videos/Screencasts/"
 - format: The video container format (mp4, mkv), the default is mp4 if not specified.
 - silent: A boolean (true, false), if true no audio will be recorded.
