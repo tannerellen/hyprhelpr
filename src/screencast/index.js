@@ -51,6 +51,13 @@ function start(selection) {
     return;
   }
 
+  if (selection === "portal" && config.recorderExec !== "gpu-screen-recorder") {
+    console.log(
+      `${config.recorderExec} does not support portal capture, use gpu-screen-recorder for portal mode`,
+    );
+    return;
+  }
+
   createCacheDirectory();
 
   const commandArgs = [config.recorderExec];
@@ -60,12 +67,10 @@ function start(selection) {
     region = executeBash("slurp");
   }
 
-  if (region) {
-    commandArgs.push(`-g "${region}"`);
-  }
-
   // Create arguments for recorder app
-  commandArgs.push(...recorderArguments(config.recorderExec));
+  commandArgs.push(
+    ...recorderArguments(config.recorderExec, selection, region),
+  );
 
   // Start recording
   executeBash(`nohup ${commandArgs.join(" ")} &`);
@@ -200,6 +205,8 @@ function timer() {
     `prefix="${config.recordingIcon} "`,
     `display_file=${config.recordingDisplayFile}`,
     `time_file=${config.recordingTimeFile}`,
+    `cache_dir=$(dirname "$display_file")`,
+    `mkdir -p "$cache_dir"`,
     `# Initialize the elapsed time`,
     `if [[ -f "$time_file" ]]; then`,
     `# Read the contents of the file into a variable`,
@@ -212,6 +219,9 @@ function timer() {
 
     `# Function to display the elapsed time`,
     `display_time() {`,
+    `if [[ ! -d "$cache_dir" ]]; then`,
+    `exit 0`,
+    `fi`,
     `display=$(printf "$prefix%02d:%02d:%02d" $((elapsed_time / 3600)) $(( (elapsed_time % 3600) / 60 )) $((elapsed_time % 60)))`,
     `printf "$display" > "$display_file"`,
     `echo "$elapsed_time" > "$time_file"`,
@@ -269,8 +279,26 @@ function concatFileExists() {
   return concatFileExists === "true";
 }
 
-/** @type {(recorderExec: string) => string[]} */
-function recorderArguments(recorderExec) {
+/** @type {(region?: string) => string} */
+function slurpRegionToGsrRegion(region) {
+  if (!region) {
+    return "";
+  }
+
+  // slurp format: "x,y widthxheight"
+  const slurpRegionMatch = region.match(/^(\d+),(\d+)\s+(\d+)x(\d+)$/);
+  if (slurpRegionMatch) {
+    const [, x, y, width, height] = slurpRegionMatch;
+    return `${width}x${height}+${x}+${y}`;
+  }
+
+  // If already in gpu-screen-recorder format then use as-is.
+  const gsrRegionMatch = region.match(/^\d+x\d+\+\d+\+\d+$/);
+  return gsrRegionMatch ? region : "";
+}
+
+/** @type {(recorderExec: string, selection?: string, region?: string) => string[]} */
+function recorderArguments(recorderExec, selection, region) {
   /** @type {{[key: string]: string[]}} */
   const defaults = {};
 
@@ -282,20 +310,39 @@ function recorderArguments(recorderExec) {
     `-p vprofile="high"`,
     `-p level="42"`,
     `--file="${config.cacheFilePath}.${config.format}"`,
+    selection === "region" && region ? `-g "${region}"` : `-g screen`,
   ];
 
   defaults["wl-screenrec"] = [
     `--audio`,
     `--filename "${config.cacheFilePath}.${config.format}"`,
+    selection === "region" && region
+      ? `--geometry "${region}"`
+      : `--geometry screen`,
   ];
 
+  const gsrRegion = slurpRegionToGsrRegion(region);
+  defaults["gpu-screen-recorder"] = [
+    selection === "portal"
+      ? `-w portal`
+      : selection === "region"
+        ? `-w region`
+        : `-w screen`,
+    ...(selection === "region" && gsrRegion ? [`-region ${gsrRegion}`] : []),
+    `-f 15`,
+    `-k h264`,
+    `-a default_output`,
+    `-ac aac`,
+    `-q very_high`,
+    `-o "${config.cacheFilePath}.${config.format}"`,
+  ];
   const recorderArgs = config.recorderArgs
     ? config.recorderArgs
-    : defaults[recorderExec];
+    : (defaults[recorderExec] ?? []);
 
   return (config.silent && !args.audio) || args.silent
     ? recorderArgs.filter((/** @type{string} */ arg) => {
-        return !arg.startsWith("--audio");
+        return !arg.startsWith("--audio") && !arg.startsWith("-a ");
       })
     : recorderArgs;
 }
