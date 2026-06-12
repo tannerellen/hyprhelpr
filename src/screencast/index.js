@@ -317,9 +317,7 @@ function recorderArguments(recorderExec, selection, region) {
   defaults["wl-screenrec"] = [
     `--audio`,
     `--filename "${config.cacheFilePath}.${config.format}"`,
-    selection === "region" && region
-      ? `--geometry "${region}"`
-      : `--geometry screen`,
+    selection === "region" && region ? `--geometry "${region}"` : "",
   ];
 
   const gsrRegion = slurpRegionToGsrRegion(region);
