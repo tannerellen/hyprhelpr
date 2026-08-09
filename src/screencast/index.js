@@ -328,10 +328,10 @@ function recorderArguments(recorderExec, selection, region) {
         ? `-w region`
         : `-w screen`,
     ...(selection === "region" && gsrRegion ? [`-region ${gsrRegion}`] : []),
-    `-f 15`,
+    `-f 60`,
     `-k h264`,
-    `-a default_output`,
     `-ac aac`,
+    "-a default_input",
     `-q very_high`,
     `-o "${config.cacheFilePath}.${config.format}"`,
   ];
