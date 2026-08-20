@@ -91,28 +91,33 @@ function getMonitors() {
 
 /** @type {() => {id: string, app: string, name: string}[]} */
 function getWindows() {
-  try {
-    const windows = [];
-    const windowPayload = Bun.env.XDPH_WINDOW_SHARING_LIST?.trim();
-    if (!windowPayload) {
-      return [];
-    }
-    const entries = windowPayload.split("[HE>]");
-    for (const windowEntry of entries) {
+  const windows = [];
+  const windowPayload = Bun.env.XDPH_WINDOW_SHARING_LIST?.trim();
+  if (!windowPayload) {
+    return [];
+  }
+  // Each record from xdph is formatted as:
+  //   id[HC>]class[HT>]title[HE>]mappingId[HA>]
+  // with no separator before the next record's id, so split on the
+  // trailing "[HA>]" first to isolate whole records.
+  const entries = windowPayload.split("[HA>]");
+  for (const windowEntry of entries) {
+    try {
       if (!windowEntry) {
         continue;
       }
-      const explodeId = windowEntry.split("[HC>]");
+      const [beforeMappingId] = windowEntry.split("[HE>]");
+      const explodeId = beforeMappingId.split("[HC>]");
       const id = explodeId[0];
       const explodeApp = explodeId[1].split("[HT>]");
       const app = explodeApp[0];
       const name = explodeApp[1];
       windows.push({ id, app, name });
+    } catch (err) {
+      continue;
     }
-    return windows;
-  } catch (err) {
-    return [];
   }
+  return windows;
 }
 
 /** @type {() => Map<string, {type: string, value: string}>} */
