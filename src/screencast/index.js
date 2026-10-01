@@ -6,7 +6,7 @@ import { createModuleConfig } from "../config";
 
 /** @typedef {{[key: string]: string}} OnSaveCommands */
 
-/** @typedef {{cacheDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean}} Config */
+/** @typedef {{cacheDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean, systemAudio: boolean}} Config */
 
 /** @typedef {{region: string}} State */
 
@@ -331,7 +331,9 @@ function recorderArguments(recorderExec, selection, region) {
     `-f 60`,
     `-k h264`,
     `-ac aac`,
-    "-a default_input",
+    config.systemAudio
+      ? `-a "default_output|default_input"`
+      : `-a default_input`,
     `-q very_high`,
     `-o "${config.cacheFilePath}.${config.format}"`,
   ];
@@ -353,6 +355,7 @@ function getDefaults() {
     recorderExec: "wf-recorder",
     filePrefix: "screen-recording",
     silent: false,
+    systemAudio: false,
     recordingIcon: " ",
     pauseIcon: "󰏤",
     format: "mp4",
