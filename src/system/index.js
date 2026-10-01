@@ -7,7 +7,8 @@ export function executeCommand(command, options) {
     const { stdout } = options
       ? Bun.spawnSync(command, options)
       : Bun.spawnSync(command);
-    return stdout.toString().trim();
+    // stdout is null when stdio is set to "ignore"
+    return stdout ? stdout.toString().trim() : "";
   } catch (err) {
     throw err;
   }
@@ -17,6 +18,27 @@ export function executeCommand(command, options) {
 export function executeBash(command, options) {
   const commandArgs = ["bash", "-c", command];
   return executeCommand(commandArgs, options);
+}
+
+/**
+ * Runs a bash command without waiting on or capturing its output.
+ *
+ * This is important for commands that start or background a long running
+ * process (ie. anything ending in `&` like launching a GUI app). By default
+ * Bun.spawnSync captures stdout/stderr via a pipe, and a backgrounded child
+ * process inherits that same pipe. Since the pipe stays open for as long as
+ * the backgrounded process is alive, spawnSync would otherwise block until
+ * that process exits, even though the immediate bash command itself returned
+ * right away.
+ *
+ * @type {(command: string) => void}
+ */
+export function executeBashDetached(command) {
+  executeBash(command, {
+    stdout: "ignore",
+    stderr: "ignore",
+    stdin: "ignore",
+  });
 }
 
 /** @type {(dependency: string) => boolean} */

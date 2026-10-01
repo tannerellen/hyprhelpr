@@ -1,4 +1,9 @@
-import { executeBash, replaceRelativeHome, dependencyExists } from "../system";
+import {
+  executeBash,
+  executeBashDetached,
+  replaceRelativeHome,
+  dependencyExists,
+} from "../system";
 import { createModuleConfig } from "../config";
 
 // Type definitions
@@ -73,11 +78,7 @@ function start(selection) {
   );
 
   // Start recording
-  // stdout/stderr must be redirected away from the parent process' pipe,
-  // otherwise executeBash (which uses Bun.spawnSync) will block until the
-  // backgrounded recorder process exits, since it would otherwise inherit
-  // and hold open the parent's stdout pipe.
-  executeBash(`nohup ${commandArgs.join(" ")} > /dev/null 2>&1 &`);
+  executeBashDetached(`nohup ${commandArgs.join(" ")} &`);
 
   saveState({ region });
 
@@ -175,7 +176,9 @@ function runOnSaveCommands(name) {
     : config.onSaveCommands;
 
   for (const name in commands) {
-    executeBash(
+    // Save commands may launch long running apps (ie. a file manager like
+    // thunar), use executeBashDetached so we don't block waiting on them.
+    executeBashDetached(
       `echo "${config.filePath}.${config.format}" | ${replaceRelativeHome(commands[name])}`,
     );
   }
