@@ -73,7 +73,11 @@ function start(selection) {
   );
 
   // Start recording
-  executeBash(`nohup ${commandArgs.join(" ")} &`);
+  // stdout/stderr must be redirected away from the parent process' pipe,
+  // otherwise executeBash (which uses Bun.spawnSync) will block until the
+  // backgrounded recorder process exits, since it would otherwise inherit
+  // and hold open the parent's stdout pipe.
+  executeBash(`nohup ${commandArgs.join(" ")} > /dev/null 2>&1 &`);
 
   saveState({ region });
 
