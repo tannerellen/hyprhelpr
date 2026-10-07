@@ -11,7 +11,7 @@ import { createModuleConfig } from "../config";
 
 /** @typedef {{[key: string]: string}} OnSaveCommands */
 
-/** @typedef {{cacheDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean, systemAudio: boolean}} Config */
+/** @typedef {{cacheDirectory: string, runtimeDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean, systemAudio: boolean}} Config */
 
 /** @typedef {{region: string}} State */
 
@@ -193,11 +193,18 @@ function isRecording() {
 /** @type {() => void} */
 function createCacheDirectory() {
   executeBash(`mkdir -p ${replaceRelativeHome(config.cacheDirectory)}`);
+  executeBash(`mkdir -p ${replaceRelativeHome(config.runtimeDirectory)}`);
 }
 
 /** @type {() => void} */
 function cleanCacheFolder() {
   executeBash(`rm -r ${config.cacheDirectory}`);
+  // runtimeDirectory is normally a separate tmpfs path (XDG_RUNTIME_DIR), but
+  // falls back to cacheDirectory when that isn't set, so avoid removing the
+  // same directory twice.
+  if (config.runtimeDirectory !== config.cacheDirectory) {
+    executeBash(`rm -rf ${config.runtimeDirectory}`);
+  }
 }
 
 /** @type {() => void} */
@@ -235,13 +242,16 @@ function timer() {
     `echo "$elapsed_time" > "$time_file"`,
     `echo "$display" | ${config.onInterfaceUpdateCommand}`,
     `}`,
+    `# Show the initial time immediately instead of waiting a full second`,
+    `display_time`,
     `while true; do`,
     `current_time=$(($(date +%s) + offset))`,
-    `if [[ $((start_time - current_time)) != elapsed_time ]]; then`,
+    `new_elapsed_time=$((current_time - start_time + offset))`,
+    `if [[ $new_elapsed_time != $elapsed_time ]]; then`,
+    `elapsed_time=$new_elapsed_time`,
     `display_time`,
     `fi`,
     `sleep 0.25`,
-    `elapsed_time=$((current_time - start_time + offset))`,
     `done`,
   ];
   const proc = Bun.spawn(["bash", "-c", `${lines.join("\n")}`]);
@@ -372,9 +382,19 @@ function getDefaults() {
     directory: "~/Videos/Screencasts",
   };
 
+  // recordingDisplayFile/recordingTimeFile are tiny status files rewritten
+  // once a second while recording. XDG_RUNTIME_DIR is tmpfs (RAM-backed), so
+  // putting them there avoids touching the SSD at all for these ephemeral
+  // updates. The actual video cache (large, must survive on real disk) stays
+  // in cacheDirectory. Falls back to cacheDirectory if XDG_RUNTIME_DIR isn't
+  // set (eg. non-systemd setups).
+  defaults.runtimeDirectory = process.env.XDG_RUNTIME_DIR
+    ? `${process.env.XDG_RUNTIME_DIR}/hyprhelpr/screencasts`
+    : defaults.cacheDirectory;
+
   defaults.cacheFilePath = `${defaults.cacheDirectory}/${defaults.filePrefix}`;
-  defaults.recordingDisplayFile = `${defaults.cacheDirectory}/recording-display`;
-  defaults.recordingTimeFile = `${defaults.cacheDirectory}/recording-time`;
+  defaults.recordingDisplayFile = `${defaults.runtimeDirectory}/recording-display`;
+  defaults.recordingTimeFile = `${defaults.runtimeDirectory}/recording-time`;
   defaults.concatListFile = `${defaults.cacheDirectory}/concat-list`;
   defaults.recordingStateFile = `${defaults.cacheDirectory}/recording-state`;
 

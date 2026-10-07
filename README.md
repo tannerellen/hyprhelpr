@@ -181,10 +181,11 @@ The default recording is "screen" so that is optional. "portal" selection curren
 - format: The video container format (mp4, mkv), the default is mp4 if not specified.
 - silent: A boolean (true, false), if true no audio will be recorded.
 - systemAudio: A boolean (true, false), if true computer/desktop audio will be recorded in addition to the microphone. Only supported when recorderExec is "gpu-screen-recorder".
+- runtimeDirectory: The directory where the small, frequently rewritten `recording-display` and `recording-time` status files are kept. These are rewritten once a second while recording, so by default this uses `$XDG_RUNTIME_DIR` (a tmpfs/RAM-backed directory on systemd systems, typically `/run/user/<uid>`) instead of disk, avoiding unnecessary SSD writes. Falls back to `cacheDirectory` if `XDG_RUNTIME_DIR` isn't set. You normally don't need to set this yourself.
 - onInterfaceUpdateCommand: A command that runs every time the interface needs to be updated. This is every second to adjust the timer and when recording pauses or stops. An example of this is to update a custom waybar module with the current recording state. For example you could create this custom waybar module:
 ```
 "custom/screencast": {
-    "exec": "cat ~/.cache/hyprhelpr/screencasts/recording-display",
+    "exec": "cat $XDG_RUNTIME_DIR/hyprhelpr/screencasts/recording-display",
     "format": "{}",
     "interval": "once",
     "on-click": "hyprhelpr screencast pause",
@@ -195,7 +196,7 @@ Then your onInterfaceUpdateCommand would look like:
 ```
 pkill -RTMIN+2 waybar
 ```
-This will reload the waybar module so it updates based on what is currently in the ~/.cache/hyphelper/screencasts/recording-display file which is automatically created and updated by hyprhelpr. The command will also receive the display value as stdin so you can use it directly in a command for example if you wanted to write it to another file:
+This will reload the waybar module so it updates based on what is currently in the `$XDG_RUNTIME_DIR/hyprhelpr/screencasts/recording-display` file which is automatically created and updated by hyprhelpr. The command will also receive the display value as stdin so you can use it directly in a command for example if you wanted to write it to another file:
 ```
 echo $(cat) > ~/test.txt
 ```
