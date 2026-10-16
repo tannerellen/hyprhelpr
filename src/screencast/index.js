@@ -13,7 +13,7 @@ import { createModuleConfig } from "../config";
 
 /** @typedef {{cacheDirectory: string, runtimeDirectory: string, cacheFilePath: string, directory: string, fileName: string, filePath: string, concatListFile: string, recordingTimeFile: string, recordingStateFile: string, recorderExec: string, recorderArgs: [], recordingIcon: string, pauseIcon: string, format: string, recordingDisplayFile: string, onInterfaceUpdateCommand: string, onSaveCommands: OnSaveCommands, silent: boolean, systemAudio: boolean}} Config */
 
-/** @typedef {{region: string}} State */
+/** @typedef {{region: string, selection: string}} State */
 
 /** @typedef {{savecommand?: string, silent?: boolean, audio?: boolean}} Args*/
 
@@ -56,7 +56,15 @@ function start(selection) {
     return;
   }
 
-  if (selection === "portal" && config.recorderExec !== "gpu-screen-recorder") {
+  // Resuming (the second "pause" call) doesn't pass a selection, so fall
+  // back to whichever selection mode the original recording used. Otherwise
+  // resuming would silently switch back to full screen capture.
+  const effectiveSelection = selection || state.selection;
+
+  if (
+    effectiveSelection === "portal" &&
+    config.recorderExec !== "gpu-screen-recorder"
+  ) {
     console.log(
       `${config.recorderExec} does not support portal capture, use gpu-screen-recorder for portal mode`,
     );
@@ -74,13 +82,13 @@ function start(selection) {
 
   // Create arguments for recorder app
   commandArgs.push(
-    ...recorderArguments(config.recorderExec, selection, region),
+    ...recorderArguments(config.recorderExec, effectiveSelection, region),
   );
 
   // Start recording
   executeBashDetached(`nohup ${commandArgs.join(" ")} &`);
 
-  saveState({ region });
+  saveState({ region, selection: effectiveSelection });
 
   // Start timer and bar display
   timer();
