@@ -1,6 +1,6 @@
 {
   "name": "hyprhelpr",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "module": "index.js",
   "type": "module",
   "devDependencies": {
