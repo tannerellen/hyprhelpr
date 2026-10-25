@@ -4,9 +4,9 @@ import { createModuleConfig } from "../config";
 // Type definitions
 /** @typedef {{}} ConfigInput */
 
-/** @typedef {{label: string, command: string, next?: []}} LauncherEntry */
+/** @typedef {{label: string, command: string, next?: [], prompt?: string}} LauncherEntry */
 
-/** @typedef {{command: string, parameters: string, entries: LauncherEntry[]}} Config */
+/** @typedef {{command: string, promptArgs?: string, entries: LauncherEntry[]}} Config */
 
 const nextIndicator = "  ➜";
 /** @type {Config} */
@@ -33,6 +33,19 @@ function launcherResult(entries, menuSelection) {
     ) {
       if (entry.next?.length) {
         run(entry.next);
+      } else if (entry.prompt !== undefined) {
+        const promptArgs = config.promptArgs
+          ? " " + config.promptArgs.replace("{prompt}", entry.prompt)
+          : "";
+        const userInput = executeBash(
+          `${config.command}${promptArgs}`,
+        );
+        if (!userInput) return;
+        try {
+          executeBash(`nohup ${entry.command.replace("{input}", userInput)} &`);
+        } catch (err) {
+          throw err;
+        }
       } else {
         try {
           // Run the command
@@ -64,6 +77,7 @@ function getInputFromEntries(entries) {
 function getDefaults() {
   const defaults = {
     command: "",
+    promptArgs: "",
     entries: [],
   };
 

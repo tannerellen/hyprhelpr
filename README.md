@@ -57,6 +57,14 @@ hyprhelpr menu
 
 - next: Optional array that will indicate there is another sub menu. This can be an empty array if the command itself will bring up a sub menu or can contain an array of objects that contain the proproperties listed above.`
 
+- prompt: An optional string used to instruct the user what to enter when the menu entry requires free-form text input. The user's input is substituted into the command string wherever `{input}` appears. To display the prompt text in your launcher, set `promptArgs` in the top-level menu config.
+
+**Top-level config properties:**
+
+- command: The command string for the dmenu compatible launcher to use for showing the menu.
+
+- promptArgs: An optional string of additional arguments to append to `command` when showing a prompt entry. Use `{prompt}` as a placeholder for the entry's prompt text. This allows you to use launcher-specific flags to display the prompt message. For example, rofi users can set this to `-mesg "{prompt}"` to show the prompt text in the list area.
+
 
 ### Toggle
 Toggle allows easy setup to toggle apps in hyprland's special workspaces. This works great to quickly show an app and then hide it. Especially usefull for things like interacting with notes, calculator, music players or any other app that you want quick access to but doesn't need to be on screen all the time.
